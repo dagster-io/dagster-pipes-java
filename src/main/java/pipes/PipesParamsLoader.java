@@ -1,3 +1,5 @@
+package pipes;
+
 import java.util.Map;
 
 public interface PipesParamsLoader {
