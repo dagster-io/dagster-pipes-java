@@ -7,7 +7,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
@@ -15,14 +14,6 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
     private final String CONTEXT_ENV_VAR = "DAGSTER_PIPES_CONTEXT";
     private final String MESSAGES_ENV_VAR = "DAGSTER_PIPES_MESSAGES";
     private final Map<String, String> mapping;
-
-    public static void main(String[] args) {
-        PipesMappingParamsLoader loader = new PipesMappingParamsLoader(new HashMap<>());
-        loader.mapping.put(loader.CONTEXT_ENV_VAR, "eJyrVipILMlQslJQ0i/JLQDh7PTywkqTwmz95Py8ktSKEqVaAOUDDP8=");
-        loader.mapping.put(loader.MESSAGES_ENV_VAR, "eJyrVipILMlQslJQ0i/JLQDhrCpzs8qCDCP93NTi4sT01GKlWgDruAzj");
-        System.out.println(loader.loadContextParams());
-        System.out.println(loader.loadMessagesParams());
-    }
 
     public PipesMappingParamsLoader(Map<String, String> mapping) {
         this.mapping = mapping;
