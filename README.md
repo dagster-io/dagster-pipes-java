@@ -4,19 +4,22 @@
 
 ## Installation
 
-1. Install the Python (Dagster) environment: 
+1. Install the Python (Dagster) environment:
 
 ```shell
 uv sync
 ```
 
-This will automatically create a virtual environment in `.venv` and install all the Python dependencies. 
+This will automatically create a virtual environment in `.venv` and install all the Python dependencies.
 
 To use the environment, either activate it manually with `source ./.venv/bin/activate`, or use `uv run` to execute commands in the context of this environment.
 
 2. Install Java stuff
 
-TODO
+```shell
+./graflew build
+```
+
 
 ## Launching an example Dagster project
 

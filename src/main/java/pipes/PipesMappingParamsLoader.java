@@ -10,6 +10,8 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
+import java.util.HashMap;
+
 public class PipesMappingParamsLoader implements PipesParamsLoader {
     private final String CONTEXT_ENV_VAR = "DAGSTER_PIPES_CONTEXT";
     private final String MESSAGES_ENV_VAR = "DAGSTER_PIPES_MESSAGES";

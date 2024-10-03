@@ -5,20 +5,24 @@ from dagster import (
     PipesSubprocessClient,
     asset,
 )
+import subprocess
 
 from pathlib import Path
 
 ROOT_DIR = Path(__file__).parent.parent.parent
 
-JAVA_SCRIPT_PATH = ROOT_DIR / "script.java"
+CLASS_PATH = ROOT_DIR / "build/classes/java/main/pipes/PipesMappingParamsLoader.class"
 
 
 @asset(description="An asset which is computed using an external Java script")
 def java_asset(
     context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
 ) -> MaterializeResult:
+    subprocess.run(["./gradlew", "build"], check=True)
+
     return pipes_subprocess_client.run(
-        context=context, command=["java", str(JAVA_SCRIPT_PATH)]
+        context=context,
+        command=["java", "-jar", "bbuild/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"],
     ).get_materialize_result()
 
 

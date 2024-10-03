@@ -23,3 +23,7 @@ dev-dependencies = [
 [tool.dagster]
 module_name = "dagster_pipes_java.definitions"  ## name of project's Python module and where to find the definitions
 code_location_name = "Java Pipes"  ## optional, name of code location to display in the Dagster UI
+
+[tool.pytest.ini_options]
+addopts = "-s "
+testpaths = ["tests"]
