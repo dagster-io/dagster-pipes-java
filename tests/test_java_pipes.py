@@ -9,6 +9,8 @@ from pathlib import Path
 import subprocess
 import pytest
 
+from dagster._core.pipes.utils import PipesEnvContextInjector
+
 ROOT_DIR = Path(__file__).parent.parent
 
 CLASS_PATH = ROOT_DIR / "build/classes/java/main/pipes/PipesMappingParamsLoader.class"
@@ -20,7 +22,7 @@ def built_jar() -> bool:
     return True
 
 
-def test_java_pipes(built_jar: bool):
+def test_java_pipes_temp_file_context_injector(built_jar: bool):
     @asset
     def java_asset(
         context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
@@ -37,4 +39,29 @@ def test_java_pipes(built_jar: bool):
 
     materialize(
         [java_asset], resources={"pipes_subprocess_client": PipesSubprocessClient()}
+    )
+
+
+def test_java_pipes_env_context_injector(built_jar: bool):
+    @asset
+    def java_asset(
+        context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
+    ) -> MaterializeResult:
+        return pipes_subprocess_client.run(
+            context=context,
+            command=[
+                "java",
+                "-jar",
+                str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            ],
+            extras={"input": "Hello, world!"},
+        ).get_materialize_result()
+
+    materialize(
+        [java_asset],
+        resources={
+            "pipes_subprocess_client": PipesSubprocessClient(
+                context_injector=PipesEnvContextInjector()
+            )
+        },
     )
