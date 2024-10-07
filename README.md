@@ -17,7 +17,7 @@ To use the environment, either activate it manually with `source ./.venv/bin/act
 2. Install Java stuff
 
 ```shell
-./graflew build
+./gradlew build
 ```
 
 

@@ -1,46 +1,45 @@
 package pipes;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 import java.util.List;
 import java.util.Map;
 
 public class PipesContextData {
 
-    private List<String> assetKeys;  // Can be null if not provided
-    private Map<String, String> codeVersionByAssetKey;  // Can be null
-    private Map<String, PipesDataProvenance> provenanceByAssetKey;  // Can be null
-    private String partitionKey;  // Can be null
-    private PipesPartitionKeyRange partitionKeyRange;  // Can be null
-    private PipesTimeWindow partitionTimeWindow;  // Can be null
-    private String runId;  // Required
-    private String jobName;  // Can be null
-    private int retryNumber;  // Required
+    @JsonProperty("asset_keys")
+    private List<String> assetKeys;
+
+    @JsonProperty("code_version_by_asset_key")
+    private Map<String, String> codeVersionByAssetKey;
+
+    @JsonProperty("provenance_by_asset_key")
+    private Map<String, PipesDataProvenance> provenanceByAssetKey;
+
+    @JsonProperty("partition_key")
+    private String partitionKey;
+
+    @JsonProperty("partition_key_range")
+    private PipesPartitionKeyRange partitionKeyRange;
+
+    @JsonProperty("partition_time_window")
+    private PipesTimeWindow partitionTimeWindow;
+
+    @JsonProperty("run_id")
+    private String runId;
+
+    @JsonProperty("job_name")
+    private String jobName;
+
+    @JsonProperty("retry_number")
+    private int retryNumber;
+
+    @JsonProperty("extras")
     private Map<String, Object> extras;  // Required
 
-    // Constructor
-    public PipesContextData(List<String> assetKeys,
-        Map<String, String> codeVersionByAssetKey,
-        Map<String, PipesDataProvenance> provenanceByAssetKey,
-        String partitionKey,
-        PipesPartitionKeyRange partitionKeyRange,
-        PipesTimeWindow partitionTimeWindow,
-        String runId,
-        String jobName,
-        int retryNumber,
-        Map<String, Object> extras
-    ) {
-        this.assetKeys = assetKeys;
-        this.codeVersionByAssetKey = codeVersionByAssetKey;
-        this.provenanceByAssetKey = provenanceByAssetKey;
-        this.partitionKey = partitionKey;
-        this.partitionKeyRange = partitionKeyRange;
-        this.partitionTimeWindow = partitionTimeWindow;
-        this.runId = runId;
-        this.jobName = jobName;
-        this.retryNumber = retryNumber;
-        this.extras = extras;
+    public PipesContextData() {
     }
 
-    // Getters and Setters for each field
     public List<String> getAssetKeys() {
         return assetKeys;
     }

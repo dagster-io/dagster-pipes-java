@@ -7,6 +7,7 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
@@ -23,24 +24,24 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
         return this.mapping.containsKey(CONTEXT_ENV_VAR);
     }
 
-    public Map<String, String> loadContextParams() {
+    public Map<String, Object> loadContextParams() {
         String rawValue = this.mapping.get(CONTEXT_ENV_VAR);
         return decodeParam(rawValue);
     }
 
-    public Map<String, String> loadMessagesParams() {
+    public Map<String, Object> loadMessagesParams() {
         String rawValue = this.mapping.get(MESSAGES_ENV_VAR);
         return decodeParam(rawValue);
     }
 
-    private Map<String, String> decodeParam(String rawValue) {
+    private Map<String, Object> decodeParam(String rawValue) {
         try {
             byte[] base64Decoded = Base64.getDecoder().decode(rawValue);
             byte[] zlibDecompressed = zlibDecompress(base64Decoded);
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(
-                    zlibDecompressed,
-                    new TypeReference<Map<String, String>>() {}
+                zlibDecompressed,
+                new TypeReference<Map<String, Object>>() {}
             );
         } catch (IOException ioe) {
             // TODO: Add logging here, if needed
