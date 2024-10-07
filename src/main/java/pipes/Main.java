@@ -13,7 +13,5 @@ public class Main {
         PipesMappingParamsLoader paramsLoader = new PipesMappingParamsLoader(input);
         PipesDefaultContextLoader contextLoader = new PipesDefaultContextLoader();
         contextLoader.loadContext(paramsLoader.loadContextParams());
-
-        System.out.println("debug");
     }
 }

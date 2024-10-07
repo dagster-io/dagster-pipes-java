@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    //id 'pmd'
 }
 
 group = 'org.example'
@@ -23,10 +24,16 @@ test {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'pipes.PipesMappingParamsLoader'
+        attributes 'Main-Class': 'pipes.Main'
     }
     from {
         configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+
+
+//pmd {
+//    consoleOutput = true
+//    toolVersion = "7.6.0"
+//}
