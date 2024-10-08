@@ -10,11 +10,7 @@ import java.util.Base64;
 import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
-import java.util.HashMap;
-
 public class PipesMappingParamsLoader implements PipesParamsLoader {
-    private final String CONTEXT_ENV_VAR = "DAGSTER_PIPES_CONTEXT";
-    private final String MESSAGES_ENV_VAR = "DAGSTER_PIPES_MESSAGES";
     private final Map<String, String> mapping;
 
     public PipesMappingParamsLoader(Map<String, String> mapping) {
@@ -22,27 +18,27 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
     }
 
     public boolean isDagsterPipesProcess() {
-        return this.mapping.containsKey(CONTEXT_ENV_VAR);
+        return this.mapping.containsKey(PipesVariables.CONTEXT_ENV_VAR.name);
     }
 
-    public Map<String, String> loadContextParams() {
-        String rawValue = this.mapping.get(CONTEXT_ENV_VAR);
+    public Map<String, Object> loadContextParams() {
+        String rawValue = this.mapping.get(PipesVariables.CONTEXT_ENV_VAR.name);
         return decodeParam(rawValue);
     }
 
-    public Map<String, String> loadMessagesParams() {
-        String rawValue = this.mapping.get(MESSAGES_ENV_VAR);
+    public Map<String, Object> loadMessagesParams() {
+        String rawValue = this.mapping.get(PipesVariables.MESSAGES_ENV_VAR.name);
         return decodeParam(rawValue);
     }
 
-    private Map<String, String> decodeParam(String rawValue) {
+    private Map<String, Object> decodeParam(String rawValue) {
         try {
             byte[] base64Decoded = Base64.getDecoder().decode(rawValue);
             byte[] zlibDecompressed = zlibDecompress(base64Decoded);
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(
-                    zlibDecompressed,
-                    new TypeReference<Map<String, String>>() {}
+                zlibDecompressed,
+                new TypeReference<Map<String, Object>>() {}
             );
         } catch (IOException ioe) {
             // TODO: Add logging here, if needed
