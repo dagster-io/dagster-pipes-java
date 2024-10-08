@@ -10,12 +10,12 @@ import java.util.Set;
 @Disabled
 public class ContextDataTest {
 
-    private final PipesContextData contextData;
+    private PipesContextData contextData;
     private Map<String, String> extras;
     private String jobName;
 
-    ContextDataTest(Map<String, String> input) throws DagsterPipesException {
-        this.contextData = DataLoader.getData(input);
+    ContextDataTest(PipesContextData pipesContextData) throws DagsterPipesException {
+        this.contextData = pipesContextData;
     }
 
     void setExtras(Map<String, String> extras) {

@@ -9,16 +9,23 @@ import java.util.Map;
 public class MainTest implements Runnable {
 
     @CommandLine.Option(
-            names = {"--context"},
-            description = "Provide DAGSTER_PIPES_CONTEXT value for testing"
+        names = {"--context"},
+        description = "Provide DAGSTER_PIPES_CONTEXT value for testing"
     )
     private String context;
 
     @CommandLine.Option(
-            names = {"--messages"},
-            description = "Provide DAGSTER_PIPES_MESSAGES value for testing"
+        names = {"--messages"},
+        description = "Provide DAGSTER_PIPES_MESSAGES value for testing"
     )
     private String messages;
+
+    @CommandLine.Option(
+        names = {"--env"},
+        description = "Get DAGSTER_PIPES_MESSAGES & DAGSTER_PIPES_CONTEXT values " +
+            "from environmental variables"
+    )
+    private boolean env = false;
 
     @CommandLine.Option(
         names = {"--jobName"},
@@ -35,16 +42,19 @@ public class MainTest implements Runnable {
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
-
-        if (this.context != null) {
-            input.put("DAGSTER_PIPES_CONTEXT", this.context);
-        }
-        if (this.messages != null) {
-            input.put("DAGSTER_PIPES_MESSAGES", this.messages);
-        }
-
+        ContextDataTest contextDataTest;
         try {
-            ContextDataTest contextDataTest = new ContextDataTest(input);
+            if (this.env) {
+                contextDataTest = new ContextDataTest(DataLoader.getData());
+            } else {
+                if (this.context != null) {
+                    input.put(PipesVariables.CONTEXT_ENV_VAR.name, this.context);
+                }
+                if (this.messages != null) {
+                    input.put(PipesVariables.MESSAGES_ENV_VAR.name, this.messages);
+                }
+                contextDataTest = new ContextDataTest(DataLoader.getData(input));
+            }
 
             if (this.extras != null) {
                 contextDataTest.setExtras(this.extras);

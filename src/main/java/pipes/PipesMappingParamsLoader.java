@@ -7,13 +7,10 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.zip.InflaterInputStream;
 
 public class PipesMappingParamsLoader implements PipesParamsLoader {
-    private final String CONTEXT_ENV_VAR = "DAGSTER_PIPES_CONTEXT";
-    private final String MESSAGES_ENV_VAR = "DAGSTER_PIPES_MESSAGES";
     private final Map<String, String> mapping;
 
     public PipesMappingParamsLoader(Map<String, String> mapping) {
@@ -21,16 +18,16 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
     }
 
     public boolean isDagsterPipesProcess() {
-        return this.mapping.containsKey(CONTEXT_ENV_VAR);
+        return this.mapping.containsKey(PipesVariables.CONTEXT_ENV_VAR.name);
     }
 
     public Map<String, Object> loadContextParams() {
-        String rawValue = this.mapping.get(CONTEXT_ENV_VAR);
+        String rawValue = this.mapping.get(PipesVariables.CONTEXT_ENV_VAR.name);
         return decodeParam(rawValue);
     }
 
     public Map<String, Object> loadMessagesParams() {
-        String rawValue = this.mapping.get(MESSAGES_ENV_VAR);
+        String rawValue = this.mapping.get(PipesVariables.MESSAGES_ENV_VAR.name);
         return decodeParam(rawValue);
     }
 
