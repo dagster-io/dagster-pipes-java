@@ -14,8 +14,13 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-core', version: '2.18.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-annotations', version: '2.18.0'
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.0'
-    testImplementation platform('org.junit:junit-bom:5.10.0')
-    testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'info.picocli:picocli:4.7.6'
+    annotationProcessor 'info.picocli:picocli-codegen:4.7.6'
+    implementation 'org.junit.platform:junit-platform-launcher:1.10.0'
+    //testImplementation platform('org.junit:junit-bom:5.10.0')
+    //testImplementation 'org.junit.jupiter:junit-jupiter'
+    implementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
+    implementation 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
 }
 
 test {
@@ -24,12 +29,14 @@ test {
 
 jar {
     manifest {
-        attributes 'Main-Class': 'pipes.Main'
+        attributes 'Main-Class': 'pipes.MainTest'
     }
     from {
-        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect { it.isDirectory() ? it : zipTree(it) } +
+        sourceSets.test.output
     }
     duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    dependsOn compileTestJava // Ensure test classes are compiled before creating the JAR
 }
 
 
