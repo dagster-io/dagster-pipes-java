@@ -5,20 +5,19 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.Map;
-import java.util.Set;
 
 @Disabled
 public class ContextDataTest {
 
     private PipesContextData contextData;
-    private Map<String, String> extras;
+    private Map<String, Object> extras;
     private String jobName;
 
     ContextDataTest(PipesContextData pipesContextData) throws DagsterPipesException {
         this.contextData = pipesContextData;
     }
 
-    void setExtras(Map<String, String> extras) {
+    void setExtras(Map<String, Object> extras) {
         this.extras = extras;
     }
 
@@ -28,11 +27,8 @@ public class ContextDataTest {
 
     @Test
     public void testExtras() {
-        Set<Map.Entry<String, String>> sanitizedExtras = TestUtils
-            .sanitizeMapEntries(this.extras);
-
         Assertions.assertTrue(
-            contextData.getExtras().entrySet().containsAll(sanitizedExtras),
+            contextData.getExtras().entrySet().containsAll(this.extras.entrySet()),
             "Extras does not contain all provided entries."
         );
         System.out.println("Extras are correct.");

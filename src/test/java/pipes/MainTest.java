@@ -1,7 +1,11 @@
 package pipes;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import picocli.CommandLine;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,10 +38,10 @@ public class MainTest implements Runnable {
     private String jobName;
 
     @CommandLine.Option(
-        names = {"--extras"},
-        description = "Provide value of 'extras' for testing"
+            names = {"--extras"},
+            description = "Provide path to 'extras' JSON for testing"
     )
-    private Map<String, String> extras;
+    private String extras;
 
     @Override
     public void run() {
@@ -57,7 +61,13 @@ public class MainTest implements Runnable {
             }
 
             if (this.extras != null) {
-                contextDataTest.setExtras(this.extras);
+                File jsonFile = new File(this.extras);
+                ObjectMapper objectMapper = new ObjectMapper();
+                Map<String, Object> extrasMap = objectMapper.readValue(
+                    jsonFile,
+                    new TypeReference<Map<String, Object>>() {}
+                );
+                contextDataTest.setExtras(extrasMap);
                 contextDataTest.testExtras();
             }
 
@@ -65,8 +75,8 @@ public class MainTest implements Runnable {
                 contextDataTest.setJobName(this.jobName);
                 contextDataTest.testJobName();
             }
-        } catch (DagsterPipesException dpe) {
-            throw new RuntimeException(dpe);
+        } catch (DagsterPipesException | IOException exception) {
+            throw new RuntimeException(exception);
         }
 
         System.out.println("All tests finished.");
