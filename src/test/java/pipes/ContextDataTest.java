@@ -41,8 +41,8 @@ public class ContextDataTest {
     @Test
     public void testJobName() {
         Assertions.assertEquals(
-            contextData.getJobName(),
             this.jobName,
+            contextData.getJobName(),
             "JobName is incorrect."
         );
         System.out.println("JobName is correct.");
