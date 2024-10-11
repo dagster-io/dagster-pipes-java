@@ -18,16 +18,16 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
     }
 
     public boolean isDagsterPipesProcess() {
-        return this.mapping.containsKey(PipesVariables.CONTEXT_ENV_VAR.name);
+        return this.mapping.containsKey(PipesConstants.CONTEXT_ENV_VAR.name);
     }
 
     public Map<String, Object> loadContextParams() {
-        String rawValue = this.mapping.get(PipesVariables.CONTEXT_ENV_VAR.name);
+        String rawValue = this.mapping.get(PipesConstants.CONTEXT_ENV_VAR.name);
         return decodeParam(rawValue);
     }
 
     public Map<String, Object> loadMessagesParams() {
-        String rawValue = this.mapping.get(PipesVariables.MESSAGES_ENV_VAR.name);
+        String rawValue = this.mapping.get(PipesConstants.MESSAGES_ENV_VAR.name);
         return decodeParam(rawValue);
     }
 

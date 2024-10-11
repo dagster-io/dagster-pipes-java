@@ -1,19 +1,21 @@
 package pipes.writers;
 
 import pipes.DagsterPipesException;
-import pipes.PipesOpenedData;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public abstract class PipesMessageWriter<T extends PipesMessageWriterChannel> {
 
     public abstract T open(Map<String, Object> params) throws DagsterPipesException;
 
-    public final PipesOpenedData getOpenedPayload() {
-        return new PipesOpenedData(getOpenedExtras().getExtras());
+    public final Map<String, Object> getOpenedPayload() {
+        Map<String, Object> payload = new HashMap<>();
+        payload.put("extras", getOpenedExtras());
+        return payload;
     }
 
-    public PipesExtras getOpenedExtras() {
-        return new PipesExtras();
+    public Map<String, Object> getOpenedExtras() {
+        return new HashMap<>();
     }
 }

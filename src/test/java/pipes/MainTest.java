@@ -46,18 +46,24 @@ public class MainTest implements Runnable {
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
-        ContextDataTest contextDataTest;
+        PipesTests pipesTests;
         try {
             if (this.env) {
-                contextDataTest = new ContextDataTest(DataLoader.getData());
+                pipesTests = new PipesTests(
+                    DataLoader.getData(),
+                    WriterChannelLoader.getWriter()
+                );
             } else {
                 if (this.context != null) {
-                    input.put(PipesVariables.CONTEXT_ENV_VAR.name, this.context);
+                    input.put(PipesConstants.CONTEXT_ENV_VAR.name, this.context);
                 }
                 if (this.messages != null) {
-                    input.put(PipesVariables.MESSAGES_ENV_VAR.name, this.messages);
+                    input.put(PipesConstants.MESSAGES_ENV_VAR.name, this.messages);
                 }
-                contextDataTest = new ContextDataTest(DataLoader.getData(input));
+                pipesTests = new PipesTests(
+                    DataLoader.getData(input),
+                    WriterChannelLoader.getWriter(input)
+                );
             }
 
             if (this.extras != null) {
@@ -67,14 +73,16 @@ public class MainTest implements Runnable {
                     jsonFile,
                     new TypeReference<Map<String, Object>>() {}
                 );
-                contextDataTest.setExtras(extrasMap);
-                contextDataTest.testExtras();
+                pipesTests.setExtras(extrasMap);
+                pipesTests.testExtras();
             }
 
             if (this.jobName != null) {
-                contextDataTest.setJobName(this.jobName);
-                contextDataTest.testJobName();
+                pipesTests.setJobName(this.jobName);
+                pipesTests.testJobName();
             }
+
+            pipesTests.testMessageWriter();
         } catch (DagsterPipesException | IOException exception) {
             throw new RuntimeException(exception);
         }

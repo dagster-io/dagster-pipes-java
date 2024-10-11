@@ -1,11 +1,27 @@
 package pipes;
 
-import java.util.AbstractMap;
-import java.util.Map;
-import java.util.Set;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TestUtils {
+
+    public static String getLastLine(String path) throws IOException {
+        try (Stream<String> lines = Files.lines(Paths.get(path))) {
+            Queue<String> queue = new LinkedList<>();
+            lines.forEach(line -> {
+                if (!queue.isEmpty()) {
+                    queue.remove();
+                }
+                queue.add(line);
+            });
+
+            return String.join("\n", queue);
+        }
+    }
 
     public static Set<Map.Entry<String, String>> sanitizeMapEntries(Map<String, String> map) {
         return map.entrySet().stream()

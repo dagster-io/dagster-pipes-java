@@ -1,7 +1,7 @@
 package pipes.writers;
 
 import pipes.DagsterPipesException;
-import pipes.PipesVariables;
+import pipes.PipesConstants;
 import pipes.utils.PipesUtils;
 
 import java.io.*;
@@ -16,10 +16,10 @@ public class PipesDefaultMessageWriter extends PipesMessageWriter<PipesMessageWr
 
     @Override
     public PipesMessageWriterChannel open(Map<String, Object> params) throws DagsterPipesException {
-        if (params.containsKey(PipesVariables.PATH_KEY.name)) {
+        if (params.containsKey(PipesConstants.PATH_KEY.name)) {
             String path = PipesUtils.assertEnvParamType(
                 params,
-                PipesVariables.PATH_KEY.name,
+                PipesConstants.PATH_KEY.name,
                 String.class,
                 this.getClass()
             );
@@ -54,7 +54,7 @@ public class PipesDefaultMessageWriter extends PipesMessageWriter<PipesMessageWr
         } else {
             throw new DagsterPipesException(String.format(
                 "Invalid params for %s, expected key \"%s\" or \"%s\", received %s",
-                this.getClass().getSimpleName(), PipesVariables.PATH_KEY.name, STDIO_KEY, params)
+                this.getClass().getSimpleName(), PipesConstants.PATH_KEY.name, STDIO_KEY, params)
             );
         }
     }

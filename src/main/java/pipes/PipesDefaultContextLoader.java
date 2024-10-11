@@ -7,7 +7,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.Map;
 
-public class PipesDefaultContextLoader {
+public class PipesDefaultContextLoader extends PipesContextLoader {
     private final String FILE_PATH_KEY = "path";
     private final String DIRECT_KEY = "data";
 
