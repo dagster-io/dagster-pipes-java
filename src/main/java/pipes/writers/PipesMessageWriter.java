@@ -1,4 +1,7 @@
-package pipes;
+package pipes.writers;
+
+import pipes.DagsterPipesException;
+import pipes.PipesOpenedData;
 
 import java.util.Map;
 

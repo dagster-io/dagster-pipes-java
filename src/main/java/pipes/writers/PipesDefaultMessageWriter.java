@@ -1,5 +1,7 @@
-package pipes;
+package pipes.writers;
 
+import pipes.DagsterPipesException;
+import pipes.PipesVariables;
 import pipes.utils.PipesUtils;
 
 import java.io.*;

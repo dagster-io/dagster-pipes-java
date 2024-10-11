@@ -1,4 +1,4 @@
-package pipes;
+package pipes.writers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 

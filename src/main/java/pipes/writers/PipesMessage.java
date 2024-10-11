@@ -1,4 +1,4 @@
-package pipes;
+package pipes.writers;
 
 import java.util.Map;
 

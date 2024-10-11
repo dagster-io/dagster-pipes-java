@@ -1,4 +1,4 @@
-package pipes;
+package pipes.writers;
 
 import java.io.OutputStream;
 import java.io.PrintWriter;
