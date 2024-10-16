@@ -96,6 +96,8 @@ public class MainTest implements Runnable {
             pipesTests.testMessageWriter();
         } catch (DagsterPipesException | IOException exception) {
             throw new RuntimeException(exception);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
 
         System.out.println("All tests finished.");
