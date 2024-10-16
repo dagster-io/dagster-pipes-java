@@ -1,7 +1,5 @@
 package pipes;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-
 import java.util.Map;
 
 public interface PipesParamsLoader {

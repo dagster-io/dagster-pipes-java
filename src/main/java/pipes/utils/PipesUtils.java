@@ -1,7 +1,11 @@
 package pipes.utils;
 
+import generated.Method;
 import pipes.DagsterPipesException;
+import pipes.PipesConstants;
+import pipes.writers.PipesMessage;
 
+import java.util.HashMap;
 import java.util.Map;
 
 public final class PipesUtils {
@@ -31,5 +35,9 @@ public final class PipesUtils {
         }
 
         return expectedType.cast(value);
+    }
+
+    public static PipesMessage makeMessage(Method method, Map<String, Object> params) {
+        return new PipesMessage(PipesConstants.PIPES_PROTOCOL_VERSION.name, method.toValue(), params);
     }
 }
