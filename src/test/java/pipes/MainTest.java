@@ -38,10 +38,16 @@ public class MainTest implements Runnable {
     private String jobName;
 
     @CommandLine.Option(
-            names = {"--extras"},
-            description = "Provide path to 'extras' JSON for testing"
+        names = {"--extras"},
+        description = "Provide path to 'extras' JSON for testing"
     )
     private String extras;
+
+    @CommandLine.Option(
+        names = {"--full"},
+        description = "Flag to test full PipesContext usage"
+    )
+    private boolean full = false;
 
     @Override
     public void run() {
@@ -64,6 +70,11 @@ public class MainTest implements Runnable {
                     DataLoader.getData(input),
                     WriterChannelLoader.getWriter(input)
                 );
+            }
+
+            if (this.full) {
+                pipesTests.fullTest();
+                return;
             }
 
             if (this.extras != null) {

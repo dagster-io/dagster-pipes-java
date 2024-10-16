@@ -3,9 +3,7 @@ package pipes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import pipes.writers.PipesFileMessageWriterChannel;
-import pipes.writers.PipesMessage;
-import pipes.writers.PipesMessageWriterChannel;
+import pipes.writers.*;
 
 import java.io.File;
 import java.io.IOException;
@@ -15,6 +13,7 @@ import java.util.Map;
 @Disabled
 public class PipesTests {
 
+    private Map<String, String> input;
     private PipesContextData contextData;
     private PipesMessageWriterChannel writer;
     private Map<String, Object> extras;
@@ -26,6 +25,10 @@ public class PipesTests {
     ) throws DagsterPipesException {
         this.contextData = pipesContextData;
         this.writer = writer;
+    }
+
+    void setInput(Map<String, String> input) {
+        this.input = input;
     }
 
     void setExtras(Map<String, Object> extras) {
@@ -69,6 +72,21 @@ public class PipesTests {
                 "{\"dagsterPipesVersion\":\"1.0\",\"method\":\"bla\",\"params\":{\"1\":1,\"2\":2}}",
                 TestUtils.getLastLine(file.getPath())
             );
+        }
+    }
+
+    @Test
+    public void fullTest() throws Exception {
+        PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
+        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
+        PipesMessageWriter messageWriter = new PipesDefaultMessageWriter();
+        PipesContext pipesContext = new PipesContext(paramsLoader, contextLoader, messageWriter);
+        try {
+            // TODO::
+        } catch (Exception exception) {
+            pipesContext.reportException(exception);
+        } finally {
+            pipesContext.close();
         }
     }
 }

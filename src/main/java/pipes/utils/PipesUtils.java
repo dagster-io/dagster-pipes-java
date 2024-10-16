@@ -1,5 +1,6 @@
 package pipes.utils;
 
+import generated.Method;
 import pipes.DagsterPipesException;
 import pipes.PipesConstants;
 import pipes.writers.PipesMessage;
@@ -36,7 +37,7 @@ public final class PipesUtils {
         return expectedType.cast(value);
     }
 
-    public static PipesMessage makeMessage(String method, Map<String, Object> params) {
-        return new PipesMessage(PipesConstants.PIPES_PROTOCOL_VERSION.name, method, params);
+    public static PipesMessage makeMessage(Method method, Map<String, Object> params) {
+        return new PipesMessage(PipesConstants.PIPES_PROTOCOL_VERSION.name, method.toValue(), params);
     }
 }
