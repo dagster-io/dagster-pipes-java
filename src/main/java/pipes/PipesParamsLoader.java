@@ -1,9 +1,10 @@
 package pipes;
 
 import java.util.Map;
+import java.util.Optional;
 
 public interface PipesParamsLoader {
     boolean isDagsterPipesProcess();
-    Map<String, Object> loadContextParams();
-    Map<String, Object> loadMessagesParams();
+    Optional<Map<String, Object>> loadContextParams();
+    Optional<Map<String, Object>> loadMessagesParams();
 }
