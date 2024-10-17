@@ -69,6 +69,7 @@ EXTRAS_LIST = [
 # 20 samples
 # @settings(max_examples=1)
 # @given(extras=extras_strategy)
+@parametrize("full", (True, False))
 @parametrize("extras", EXTRAS_LIST)
 @parametrize(
     "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
@@ -76,6 +77,7 @@ EXTRAS_LIST = [
 def test_java_pipes(
     context_injector: PipesContextInjector,
     extras: Dict[str, Any],
+    full: bool,
     tmpdir_factory,
     capsys,
 ):
@@ -92,16 +94,21 @@ def test_java_pipes(
     ) -> MaterializeResult:
         job_name = context.dagster_run.job_name
 
+        args = [
+            "java",
+            "-jar",
+            str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            "--env",
+            f"--extras={str(extras_path)}",
+            f"--jobName={job_name}",
+        ]
+
+        if full:
+            args.append("--full")
+
         return pipes_subprocess_client.run(
             context=context,
-            command=[
-                "java",
-                "-jar",
-                str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
-                "--env",
-                f"--extras={str(extras_path)}",
-                f"--jobName={job_name}",
-            ],
+            command=args,
             extras=extras,
         ).get_materialize_result()
 
@@ -116,3 +123,10 @@ def test_java_pipes(
     )
 
     assert result.success
+
+    captured = capsys.readouterr()
+
+    if full:
+        assert (
+            "[pipes] did not receive any messages from external process" not in captured.err
+        )
