@@ -140,6 +140,9 @@ def test_java_pipes(
     with open(str(extras_path), "w") as f:
         json.dump(extras, f)
 
+    with open(str(custom_payload_path), "w") as f:
+        json.dump({"payload": custom_message_payload}, f)
+
     @asset
     def java_asset(
         context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
