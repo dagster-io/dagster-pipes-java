@@ -176,7 +176,7 @@ public class PipesContext {
         return this.data.getExtras();
     }
 
-    private void assertSingleAsset(Collection<?> collection, String name) throws DagsterPipesException {
+    private static void assertSingleAsset(Collection<?> collection, String name) throws DagsterPipesException {
         if (collection.size() != 1) {
             throw new DagsterPipesException(
                 String.format("%s is undefined. Current step targets multiple assets.", name)
@@ -184,7 +184,7 @@ public class PipesContext {
         }
     }
 
-    private void assertSingleAsset(Map<?, ?> map, String name) throws DagsterPipesException {
+    private static void assertSingleAsset(Map<?, ?> map, String name) throws DagsterPipesException {
         if (map.size() != 1) {
             throw new DagsterPipesException(
                 String.format("%s is undefined. Current step targets multiple assets.", name)
@@ -192,7 +192,7 @@ public class PipesContext {
         }
     }
 
-    private void assertPresence(Object object, String name) throws DagsterPipesException {
+    private static void assertPresence(Object object, String name) throws DagsterPipesException {
         if (object == null) {
             throw new DagsterPipesException(
                 String.format("%s is undefined. Current step does not target an asset.", name)
@@ -206,12 +206,14 @@ public class PipesContext {
     }
 
 
-//
+
+
+    // TODO:: Delete
 //    public void reportAssetMaterialization(
 //        Map<String, Object> metadata,
 //        String dataVersion,
 //        String assetKey
-//    ) throws IOException {
+//    ) {
 //        assetKey = resolveOptionallyPassedAssetKey(assetKey);
 //        if (materializedAssets.contains(assetKey)) {
 //            throw new IllegalStateException(
@@ -225,6 +227,7 @@ public class PipesContext {
 //        sendMessage("report_asset_materialization", map);
 //        materializedAssets.add(assetKey);
 //    }
+
 //
 //    public void reportAssetCheck(
 //        String checkName,
