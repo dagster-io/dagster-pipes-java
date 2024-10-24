@@ -1,9 +1,7 @@
-package pipes.data;
-
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
+package io.quicktype;
 
 import java.io.IOException;
+import com.fasterxml.jackson.annotation.*;
 
 /**
  * Event type

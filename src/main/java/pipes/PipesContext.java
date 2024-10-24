@@ -1,5 +1,6 @@
 package pipes;
 
+import com.fasterxml.jackson.databind.JsonSerializable;
 import pipes.data.*;
 import pipes.loaders.PipesContextLoader;
 import pipes.loaders.PipesParamsLoader;
@@ -73,7 +74,13 @@ public class PipesContext {
         return instance;
     }
 
-    public void writeMessage(
+    public void reportCustomMessage(Object payload) throws DagsterPipesException, IOException {
+        Map<String, Object> map = new HashMap<>();
+        map.put("payload", payload);
+        writeMessage(Method.REPORT_CUSTOM_MESSAGE, map);
+    }
+
+    private void writeMessage(
         Method method,
         Map<String, Object> params
     ) throws DagsterPipesException, IOException {
@@ -130,7 +137,6 @@ public class PipesContext {
     public boolean isPartitionStep() {
         return this.data.getPartitionKeyRange() != null;
     }
-
 
     public String getPartitionKey() throws DagsterPipesException {
         String partitionKey = this.data.getPartitionKey();
@@ -205,9 +211,6 @@ public class PipesContext {
         }
     }
 
-
-
-
     // TODO:: Delete
 //    public void reportAssetMaterialization(
 //        Map<String, Object> metadata,
@@ -227,7 +230,6 @@ public class PipesContext {
 //        sendMessage("report_asset_materialization", map);
 //        materializedAssets.add(assetKey);
 //    }
-
 //
 //    public void reportAssetCheck(
 //        String checkName,
@@ -246,11 +248,6 @@ public class PipesContext {
 //        sendMessage("report_asset_check", map);
 //    }
 //
-//    public void reportCustomMessage(Object payload) throws IOException {
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("payload", payload);
-//        sendMessage("report_custom_message", map);
-//    }
 //
 //    public Logger getLogger() {
 //        return logger;
