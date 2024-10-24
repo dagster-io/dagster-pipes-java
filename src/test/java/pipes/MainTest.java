@@ -88,7 +88,9 @@ public class MainTest implements Runnable {
             if (this.extras != null) {
                 File jsonFile = new File(this.extras);
                 ObjectMapper objectMapper = new ObjectMapper();
-                Map<String, Object> extrasMap = objectMapper.readValue(jsonFile, new TypeReference<>(){});
+                Map<String, Object> extrasMap = objectMapper.readValue(
+                    jsonFile, new TypeReference<Map<String, Object>>() {}
+                );
                 pipesTests.setExtras(extrasMap);
                 pipesTests.testExtras();
             }

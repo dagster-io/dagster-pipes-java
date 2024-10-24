@@ -20,7 +20,7 @@ dependencies {
     //testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
     implementation 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
-    implementation group: 'org.mockito', name: 'mockito-core', version: '5.14.2+'
+    implementation group: 'org.mockito', name: 'mockito-core', version: '2.7.5'
 
 }
 
