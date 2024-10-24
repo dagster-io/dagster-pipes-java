@@ -61,23 +61,21 @@ EXTRAS_LIST = [
 ]
 
 
-# @pytest.fixture
-# def extras(extras_data: Dict[str, Any]):
-#     return extras_data
+CUSTOM_MESSAGE_PAYLOADS = EXTRAS_LIST.copy() + [
+    1,
+    1.0,
+    "foo",
+    [1, 2, 3],
+]
 
 
-# 20 samples
-# @settings(max_examples=1)
-# @given(extras=extras_strategy)
-@parametrize("full", (True, False))
 @parametrize("extras", EXTRAS_LIST)
 @parametrize(
     "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
 )
-def test_java_pipes(
+def test_java_pipes_components(
     context_injector: PipesContextInjector,
     extras: Dict[str, Any],
-    full: bool,
     tmpdir_factory,
     capsys,
 ):
@@ -103,9 +101,6 @@ def test_java_pipes(
             f"--jobName={job_name}",
         ]
 
-        if full:
-            args.append("--full")
-
         return pipes_subprocess_client.run(
             context=context,
             command=args,
@@ -124,9 +119,71 @@ def test_java_pipes(
 
     assert result.success
 
+
+@parametrize("extras", EXTRAS_LIST)
+@parametrize("custom_message_payload", CUSTOM_MESSAGE_PAYLOADS)
+@parametrize(
+    "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
+)
+def test_java_pipes(
+    context_injector: PipesContextInjector,
+    extras: Dict[str, Any],
+    custom_message_payload: Any,
+    tmpdir_factory,
+    capsys,
+):
+    work_dir = tmpdir_factory.mktemp("work_dir")
+
+    extras_path = work_dir / "extras.json"
+    custom_payload_path = work_dir / "custom_payload.json"
+
+    with open(str(extras_path), "w") as f:
+        json.dump(extras, f)
+
+    @asset
+    def java_asset(
+        context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
+    ) -> MaterializeResult:
+        job_name = context.dagster_run.job_name
+
+        args = [
+            "java",
+            "-jar",
+            str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            "--env",
+            f"--extras={str(extras_path)}",
+            f"--jobName={job_name}",
+            "--custom-payload-path",
+            str(custom_payload_path),
+            "--full",
+        ]
+
+        invocation_result = pipes_subprocess_client.run(
+            context=context,
+            command=args,
+            extras=extras,
+        )
+
+        assert invocation_result.get_custom_messages()[0] == custom_message_payload
+
+        materialization = invocation_result.get_materialize_result()
+
+        return materialization
+
+    result = materialize(
+        [java_asset],
+        resources={
+            "pipes_subprocess_client": PipesSubprocessClient(
+                context_injector=context_injector
+            )
+        },
+        raise_on_error=False,
+    )
+
+    assert result.success
+
     captured = capsys.readouterr()
 
-    if full:
-        assert (
-            "[pipes] did not receive any messages from external process" not in captured.err
-        )
+    assert (
+        "[pipes] did not receive any messages from external process" not in captured.err
+    )
