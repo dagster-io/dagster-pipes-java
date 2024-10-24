@@ -20,9 +20,9 @@ public class PipesContext {
     private Exception exception;
 
     public PipesContext(
-            PipesParamsLoader paramsLoader,
-            PipesContextLoader contextLoader,
-            PipesMessageWriter messageWriter
+        PipesParamsLoader paramsLoader,
+        PipesContextLoader contextLoader,
+        PipesMessageWriter messageWriter
     ) throws DagsterPipesException, IOException {
         Optional<Map<String, Object>> contextParams = paramsLoader.loadContextParams();
         Optional<Map<String, Object>> messageParams = paramsLoader.loadMessagesParams();
@@ -65,7 +65,7 @@ public class PipesContext {
     public static PipesContext get() {
         if (instance == null) {
             throw new IllegalStateException(
-                    "PipesContext has not been initialized. You must call openDagsterPipes()."
+                "PipesContext has not been initialized. You must call openDagsterPipes()."
             );
         }
         return instance;
