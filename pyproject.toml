@@ -29,4 +29,5 @@ code_location_name = "Java Pipes"  ## optional, name of code location to display
 
 [tool.pytest.ini_options]
 addopts = "-s "
+color = "yes"
 testpaths = ["tests"]
