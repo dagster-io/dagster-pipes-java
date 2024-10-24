@@ -20,10 +20,10 @@ public class PipesContextData {
     private String partitionKey;
 
     @JsonProperty("partition_key_range")
-    private PipesPartitionKeyRange partitionKeyRange;
+    private PartitionKeyRange partitionKeyRange;
 
     @JsonProperty("partition_time_window")
-    private PipesTimeWindow partitionTimeWindow;
+    private PartitionTimeWindow partitionTimeWindow;
 
     @JsonProperty("run_id")
     private String runId;
@@ -72,19 +72,19 @@ public class PipesContextData {
         this.partitionKey = partitionKey;
     }
 
-    public PipesPartitionKeyRange getPartitionKeyRange() {
+    public PartitionKeyRange getPartitionKeyRange() {
         return partitionKeyRange;
     }
 
-    public void setPartitionKeyRange(PipesPartitionKeyRange partitionKeyRange) {
+    public void setPartitionKeyRange(PartitionKeyRange partitionKeyRange) {
         this.partitionKeyRange = partitionKeyRange;
     }
 
-    public PipesTimeWindow getPartitionTimeWindow() {
+    public PartitionTimeWindow getPartitionTimeWindow() {
         return partitionTimeWindow;
     }
 
-    public void setPartitionTimeWindow(PipesTimeWindow partitionTimeWindow) {
+    public void setPartitionTimeWindow(PartitionTimeWindow partitionTimeWindow) {
         this.partitionTimeWindow = partitionTimeWindow;
     }
 
