@@ -5,33 +5,33 @@ import pipes.utils.PipesUtils;
 import pipes.writers.PipesMessageWriter;
 import pipes.writers.PipesMessageWriterChannel;
 
-import java.io.Closeable;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
-public class PipesContext implements AutoCloseable {
+public class PipesContext {
 
     private static PipesContext instance = null;
-    private final Deque<AutoCloseable> ioStack = new ArrayDeque<>();
-    private final PipesContextData data;
-    private final PipesMessageWriterChannel messageChannel;
+    private PipesContextData data = null;
+    private PipesMessageWriterChannel messageChannel = null;
     private final Set<String> materializedAssets;
     private boolean closed;
     private final Logger logger;
     private Exception exception;
 
     public PipesContext(
-        PipesParamsLoader paramsLoader,
-        PipesContextLoader contextLoader,
-        PipesMessageWriter messageWriter
-    ) throws Exception {
-        Map<String, Object> contextParams = paramsLoader.loadContextParams();
-        Map<String, Object> messageParams = paramsLoader.loadMessagesParams();
-        this.data = contextLoader.loadContext(contextParams);
-        this.messageChannel = messageWriter.open(messageParams);
-        Map<String, Object> openedPayload = messageWriter.getOpenedPayload();
-        this.messageChannel.writeMessage(PipesUtils.makeMessage(Method.OPENED, openedPayload));
+            PipesParamsLoader paramsLoader,
+            PipesContextLoader contextLoader,
+            PipesMessageWriter messageWriter
+    ) throws DagsterPipesException, IOException {
+        Optional<Map<String, Object>> contextParams = paramsLoader.loadContextParams();
+        Optional<Map<String, Object>> messageParams = paramsLoader.loadMessagesParams();
+        if (contextParams.isPresent() && messageParams.isPresent()) {
+            this.data = contextLoader.loadContext(contextParams.get());
+            this.messageChannel = messageWriter.open(messageParams.get());
+            Map<String, Object> openedPayload = messageWriter.getOpenedPayload();
+            this.messageChannel.writeMessage(PipesUtils.makeMessage(Method.OPENED, openedPayload));
+        }
         // ToDO:: fix logger
         this.logger = Logger.getLogger(PipesContext.class.getName());
         this.materializedAssets = new HashSet<>();
@@ -43,8 +43,6 @@ public class PipesContext implements AutoCloseable {
         this.exception = exception;
     }
 
-
-    @Override
     public void close() throws IOException {
         if (!closed) {
             Map<String, Object> payload = new HashMap<>();
@@ -55,8 +53,6 @@ public class PipesContext implements AutoCloseable {
             closed = true;
         }
     }
-
-
 
     public static boolean isInitialized() {
         return instance != null;
@@ -69,7 +65,7 @@ public class PipesContext implements AutoCloseable {
     public static PipesContext get() {
         if (instance == null) {
             throw new IllegalStateException(
-                "PipesContext has not been initialized. You must call openDagsterPipes()."
+                    "PipesContext has not been initialized. You must call openDagsterPipes()."
             );
         }
         return instance;

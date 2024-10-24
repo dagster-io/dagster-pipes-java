@@ -8,6 +8,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.Base64;
 import java.util.Map;
+import java.util.Optional;
 import java.util.zip.InflaterInputStream;
 
 public class PipesMappingParamsLoader implements PipesParamsLoader {
@@ -21,14 +22,28 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
         return this.mapping.containsKey(PipesConstants.CONTEXT_ENV_VAR.name);
     }
 
-    public Map<String, Object> loadContextParams() {
+    public Optional<Map<String, Object>> loadContextParams() {
         String rawValue = this.mapping.get(PipesConstants.CONTEXT_ENV_VAR.name);
-        return decodeParam(rawValue);
+        if (rawValue == null) {
+            System.out.printf(
+                    "Provided mapping doesn't contain %s%n",
+                    PipesConstants.CONTEXT_ENV_VAR.name
+            );
+            return Optional.empty();
+        }
+        return Optional.of(decodeParam(rawValue));
     }
 
-    public Map<String, Object> loadMessagesParams() {
+    public Optional<Map<String, Object>> loadMessagesParams() {
         String rawValue = this.mapping.get(PipesConstants.MESSAGES_ENV_VAR.name);
-        return decodeParam(rawValue);
+        if (rawValue == null) {
+            System.out.printf(
+                    "Provided mapping doesn't contain %s%n",
+                    PipesConstants.MESSAGES_ENV_VAR.name
+            );
+            return Optional.empty();
+        }
+        return Optional.of(decodeParam(rawValue));
     }
 
     private Map<String, Object> decodeParam(String rawValue) {
@@ -37,8 +52,8 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
             byte[] zlibDecompressed = zlibDecompress(base64Decoded);
             ObjectMapper objectMapper = new ObjectMapper();
             return objectMapper.readValue(
-                zlibDecompressed,
-                new TypeReference<Map<String, Object>>() {}
+                    zlibDecompressed,
+                    new TypeReference<Map<String, Object>>() {}
             );
         } catch (IOException ioe) {
             // TODO: Add logging here, if needed
