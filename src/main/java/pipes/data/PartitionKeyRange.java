@@ -1,4 +1,4 @@
-package generated;
+package pipes.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 

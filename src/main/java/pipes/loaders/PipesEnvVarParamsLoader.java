@@ -1,4 +1,4 @@
-package pipes;
+package pipes.loaders;
 
 public class PipesEnvVarParamsLoader extends PipesMappingParamsLoader {
 

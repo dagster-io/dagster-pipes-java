@@ -3,6 +3,11 @@ package pipes;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import pipes.data.PipesContextData;
+import pipes.loaders.PipesContextLoader;
+import pipes.loaders.PipesDefaultContextLoader;
+import pipes.loaders.PipesEnvVarParamsLoader;
+import pipes.loaders.PipesParamsLoader;
 import pipes.writers.*;
 
 import java.io.File;
@@ -90,10 +95,10 @@ public class PipesTests {
         PipesMessageWriter messageWriter = new PipesDefaultMessageWriter();
         PipesContext pipesContext = new PipesContext(paramsLoader, contextLoader, messageWriter);
         try (PipesSession session = new PipesSession(pipesContext)) {
-            // TODO::
+            session.openDagsterPipes(paramsLoader, contextLoader, messageWriter);
+            System.out.println("Opened dagster pipes with set params.");
         } catch (Exception exception) {
             pipesContext.reportException(exception);
         }
-        System.out.println("Full test finished.");
     }
 }

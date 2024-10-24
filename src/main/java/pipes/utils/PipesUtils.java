@@ -1,11 +1,10 @@
 package pipes.utils;
 
-import generated.Method;
+import pipes.data.Method;
 import pipes.DagsterPipesException;
-import pipes.PipesConstants;
+import pipes.data.PipesConstants;
 import pipes.writers.PipesMessage;
 
-import java.util.HashMap;
 import java.util.Map;
 
 public final class PipesUtils {

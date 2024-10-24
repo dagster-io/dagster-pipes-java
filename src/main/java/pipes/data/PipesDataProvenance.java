@@ -1,4 +1,4 @@
-package pipes;
+package pipes.data;
 
 import java.util.Map;
 

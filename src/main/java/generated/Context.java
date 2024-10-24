@@ -1,6 +1,8 @@
 package generated;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import pipes.data.PartitionKeyRange;
+import pipes.data.PartitionTimeWindow;
 
 import java.util.Map;
 
