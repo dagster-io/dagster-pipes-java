@@ -102,8 +102,10 @@ public class PipesTests {
         try (PipesSession session = new PipesSession(pipesContext)) {
             session.openDagsterPipes(paramsLoader, contextLoader, messageWriter);
             System.out.println("Opened dagster pipes with set params.");
-            session.getContext().reportCustomMessage(this.payload);
-            System.out.println("Payload reported with custom message.");
+            if (this.payload != null) {
+                session.getContext().reportCustomMessage(this.payload);
+                System.out.println("Payload reported with custom message.");
+            }
         } catch (Exception exception) {
             pipesContext.reportException(exception);
         }
