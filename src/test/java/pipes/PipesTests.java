@@ -19,14 +19,6 @@ public class PipesTests {
     private Map<String, Object> extras;
     private String jobName;
 
-    PipesTests(
-        PipesContextData pipesContextData,
-        PipesMessageWriterChannel writer
-    ) throws DagsterPipesException {
-        this.contextData = pipesContextData;
-        this.writer = writer;
-    }
-
     void setInput(Map<String, String> input) {
         this.input = input;
     }
@@ -36,14 +28,30 @@ public class PipesTests {
     }
 
     void setJobName(String jobName) {
-       this.jobName = jobName;
+        this.jobName = jobName;
+    }
+
+    void setWriter(PipesMessageWriterChannel writer) {
+        this.writer = writer;
+    }
+
+    void setWriter() throws DagsterPipesException {
+        this.writer = WriterChannelLoader.getWriter(input);
+    }
+
+    void setContextData(PipesContextData contextData) {
+        this.contextData = contextData;
+    }
+
+    void setContextData() throws DagsterPipesException {
+        this.contextData = DataLoader.getData(input);
     }
 
     @Test
     public void testExtras() {
         Assertions.assertTrue(
-            contextData.getExtras().entrySet().containsAll(this.extras.entrySet()),
-            "Extras does not contain all provided entries."
+                contextData.getExtras().entrySet().containsAll(this.extras.entrySet()),
+                "Extras does not contain all provided entries."
         );
         System.out.println("Extras are correct.");
     }
@@ -51,9 +59,9 @@ public class PipesTests {
     @Test
     public void testJobName() {
         Assertions.assertEquals(
-            this.jobName,
-            contextData.getJobName(),
-            "JobName is incorrect."
+                this.jobName,
+                contextData.getJobName(),
+                "JobName is incorrect."
         );
         System.out.println("JobName is correct.");
     }
@@ -69,24 +77,23 @@ public class PipesTests {
             File file = new File(((PipesFileMessageWriterChannel) this.writer).getPath());
             Assertions.assertTrue(file.exists());
             Assertions.assertEquals(
-                "{\"dagsterPipesVersion\":\"1.0\",\"method\":\"bla\",\"params\":{\"1\":1,\"2\":2}}",
-                TestUtils.getLastLine(file.getPath())
+                    "{\"dagsterPipesVersion\":\"1.0\",\"method\":\"bla\",\"params\":{\"1\":1,\"2\":2}}",
+                    TestUtils.getLastLine(file.getPath())
             );
         }
     }
 
     @Test
-    public void fullTest() throws Exception {
+    public void fullTest() throws DagsterPipesException, IOException {
         PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
         PipesContextLoader contextLoader = new PipesDefaultContextLoader();
         PipesMessageWriter messageWriter = new PipesDefaultMessageWriter();
         PipesContext pipesContext = new PipesContext(paramsLoader, contextLoader, messageWriter);
-        try {
+        try (PipesSession session = new PipesSession(pipesContext)) {
             // TODO::
         } catch (Exception exception) {
             pipesContext.reportException(exception);
-        } finally {
-            pipesContext.close();
         }
+        System.out.println("Full test finished.");
     }
 }
