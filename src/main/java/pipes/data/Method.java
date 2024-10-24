@@ -13,26 +13,25 @@ public enum Method {
 
     @JsonValue
     public String toValue() {
-        return switch (this) {
-            case CLOSED -> "closed";
-            case LOG -> "log";
-            case OPENED -> "opened";
-            case REPORT_ASSET_CHECK -> "report_asset_check";
-            case REPORT_ASSET_MATERIALIZATION -> "report_asset_materialization";
-            case REPORT_CUSTOM_MESSAGE -> "report_custom_message";
-        };
+        switch (this) {
+            case CLOSED: return "closed";
+            case LOG: return "log";
+            case OPENED: return "opened";
+            case REPORT_ASSET_CHECK: return "report_asset_check";
+            case REPORT_ASSET_MATERIALIZATION: return "report_asset_materialization";
+            case REPORT_CUSTOM_MESSAGE: return "report_custom_message";
+        }
+        return null;
     }
 
     @JsonCreator
     public static Method forValue(String value) throws IOException {
-        return switch (value) {
-            case "closed" -> CLOSED;
-            case "log" -> LOG;
-            case "opened" -> OPENED;
-            case "report_asset_check" -> REPORT_ASSET_CHECK;
-            case "report_asset_materialization" -> REPORT_ASSET_MATERIALIZATION;
-            case "report_custom_message" -> REPORT_CUSTOM_MESSAGE;
-            default -> throw new IOException("Cannot deserialize Method");
-        };
+        if (value.equals("closed")) return CLOSED;
+        if (value.equals("log")) return LOG;
+        if (value.equals("opened")) return OPENED;
+        if (value.equals("report_asset_check")) return REPORT_ASSET_CHECK;
+        if (value.equals("report_asset_materialization")) return REPORT_ASSET_MATERIALIZATION;
+        if (value.equals("report_custom_message")) return REPORT_CUSTOM_MESSAGE;
+        throw new IOException("Cannot deserialize Method");
     }
 }

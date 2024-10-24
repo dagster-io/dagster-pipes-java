@@ -23,6 +23,7 @@ public class PipesTests {
     private PipesMessageWriterChannel writer;
     private Map<String, Object> extras;
     private String jobName;
+    private Map<String, Object> payload;
 
     void setInput(Map<String, String> input) {
         this.input = input;
@@ -50,6 +51,10 @@ public class PipesTests {
 
     void setContextData() throws DagsterPipesException {
         this.contextData = DataLoader.getData(input);
+    }
+
+    void setPayload(Map<String, Object> payload) {
+        this.payload = payload;
     }
 
     @Test
@@ -97,6 +102,10 @@ public class PipesTests {
         try (PipesSession session = new PipesSession(pipesContext)) {
             session.openDagsterPipes(paramsLoader, contextLoader, messageWriter);
             System.out.println("Opened dagster pipes with set params.");
+            if (this.payload != null) {
+                session.getContext().reportCustomMessage(this.payload);
+                System.out.println("Payload reported with custom message.");
+            }
         } catch (Exception exception) {
             pipesContext.reportException(exception);
         }

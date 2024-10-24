@@ -63,6 +63,10 @@ public class PipesSession implements AutoCloseable {
         );
     }
 
+    public PipesContext getContext() {
+        return context;
+    }
+
     @Override
     public void close() throws Exception {
         this.context.close();
