@@ -1,8 +1,8 @@
 package pipes.utils;
 
-import pipes.constants.Method;
+import pipes.data.Method;
 import pipes.DagsterPipesException;
-import pipes.PipesConstants;
+import pipes.data.PipesConstants;
 import pipes.writers.PipesMessage;
 
 import java.util.Map;

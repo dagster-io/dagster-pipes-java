@@ -1,6 +1,8 @@
 package pipes;
 
-import pipes.constants.Method;
+import pipes.data.*;
+import pipes.loaders.PipesContextLoader;
+import pipes.loaders.PipesParamsLoader;
 import pipes.utils.PipesUtils;
 import pipes.writers.PipesMessageWriter;
 import pipes.writers.PipesMessageWriterChannel;

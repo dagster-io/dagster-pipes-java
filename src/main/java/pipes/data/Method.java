@@ -1,4 +1,4 @@
-package pipes.constants;
+package pipes.data;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonValue;

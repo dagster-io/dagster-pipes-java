@@ -1,7 +1,8 @@
-package pipes;
+package pipes.loaders;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import pipes.data.PipesConstants;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

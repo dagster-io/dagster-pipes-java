@@ -1,4 +1,4 @@
-package pipes;
+package pipes.loaders;
 
 import java.util.Map;
 import java.util.Optional;

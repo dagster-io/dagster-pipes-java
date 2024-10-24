@@ -3,6 +3,7 @@ package pipes;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import picocli.CommandLine;
+import pipes.data.PipesConstants;
 
 import java.io.File;
 import java.io.IOException;

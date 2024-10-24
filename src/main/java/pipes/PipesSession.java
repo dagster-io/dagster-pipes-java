@@ -1,5 +1,9 @@
 package pipes;
 
+import pipes.loaders.PipesContextLoader;
+import pipes.loaders.PipesDefaultContextLoader;
+import pipes.loaders.PipesEnvVarParamsLoader;
+import pipes.loaders.PipesParamsLoader;
 import pipes.writers.PipesDefaultMessageWriter;
 import pipes.writers.PipesMessageWriter;
 
