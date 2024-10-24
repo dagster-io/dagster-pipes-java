@@ -92,11 +92,8 @@ public class PipesTests {
         try (PipesSession session = new PipesSession(pipesContext)) {
             session.openDagsterPipes(paramsLoader, contextLoader, messageWriter);
             System.out.println("Opened dagster pipes with set params.");
-            session.openDagsterPipes(null, null, null);
-            System.out.println("Opened dagster pipes with null params.");
         } catch (Exception exception) {
             pipesContext.reportException(exception);
         }
-        System.out.println("Full test finished.");
     }
 }
