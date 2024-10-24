@@ -54,7 +54,7 @@ public class MainTest implements Runnable {
     private boolean full = false;
 
     @CommandLine.Option(
-        names = {"--customPayloadPath"},
+        names = {"--custom-payload-path"},
         description = "Specify custom payload path"
     )
     private String customPayloadPath;
@@ -73,7 +73,7 @@ public class MainTest implements Runnable {
             pipesTests.setInput(input);
 
             if (this.customPayloadPath != null && !this.customPayloadPath.isEmpty()) {
-                Map<String, Object> payload = loadPayload(this.customPayloadPath);
+                Object payload = loadPayload(this.customPayloadPath);
                 pipesTests.setPayload(payload);
             }
 
@@ -109,10 +109,10 @@ public class MainTest implements Runnable {
         System.out.println("All tests finished.");
     }
 
-    private Map<String, Object> loadPayload(String jsonFilePath) {
+    private Object loadPayload(String jsonFilePath) {
         File jsonFile = new File(jsonFilePath);
         try {
-            return this.objectMapper.readValue(jsonFile, Map.class);
+            return this.objectMapper.readValue(jsonFile, Map.class).get("payload");
         } catch (IOException e) {
             throw new RuntimeException("Failed to load JSON from file: " + jsonFilePath, e);
         }

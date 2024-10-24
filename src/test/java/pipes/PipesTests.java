@@ -23,7 +23,7 @@ public class PipesTests {
     private PipesMessageWriterChannel writer;
     private Map<String, Object> extras;
     private String jobName;
-    private Map<String, Object> payload;
+    private Object payload;
 
     void setInput(Map<String, String> input) {
         this.input = input;
@@ -53,7 +53,7 @@ public class PipesTests {
         this.contextData = DataLoader.getData(input);
     }
 
-    void setPayload(Map<String, Object> payload) {
+    void setPayload(Object payload) {
         this.payload = payload;
     }
 
