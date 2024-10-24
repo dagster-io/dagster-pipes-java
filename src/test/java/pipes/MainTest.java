@@ -9,46 +9,55 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @CommandLine.Command(name = "main-test", mixinStandardHelpOptions = true)
 public class MainTest implements Runnable {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
     @CommandLine.Option(
-            names = {"--context"},
-            description = "Provide DAGSTER_PIPES_CONTEXT value for testing"
+        names = {"--context"},
+        description = "Provide DAGSTER_PIPES_CONTEXT value for testing"
     )
     private String context;
 
     @CommandLine.Option(
-            names = {"--messages"},
-            description = "Provide DAGSTER_PIPES_MESSAGES value for testing"
+        names = {"--messages"},
+        description = "Provide DAGSTER_PIPES_MESSAGES value for testing"
     )
     private String messages;
 
     @CommandLine.Option(
-            names = {"--env"},
-            description = "Get DAGSTER_PIPES_MESSAGES & DAGSTER_PIPES_CONTEXT values " +
-                    "from environmental variables"
+        names = {"--env"},
+        description = "Get DAGSTER_PIPES_MESSAGES & DAGSTER_PIPES_CONTEXT values " +
+            "from environmental variables"
     )
     private boolean env = false;
 
     @CommandLine.Option(
-            names = {"--jobName"},
-            description = "Provide value of 'jobName' for testing"
+        names = {"--jobName"},
+        description = "Provide value of 'jobName' for testing"
     )
     private String jobName;
 
     @CommandLine.Option(
-            names = {"--extras"},
-            description = "Provide path to 'extras' JSON for testing"
+        names = {"--extras"},
+        description = "Provide path to 'extras' JSON for testing"
     )
     private String extras;
 
     @CommandLine.Option(
-            names = {"--full"},
-            description = "Flag to test full PipesContext usage"
+        names = {"--full"},
+        description = "Flag to test full PipesContext usage"
     )
     private boolean full = false;
+
+    @CommandLine.Option(
+        names = {"--custom-payload-path"},
+        description = "Specify custom payload path"
+    )
+    private String customPayloadPath;
 
     @Override
     public void run() {
@@ -63,6 +72,11 @@ public class MainTest implements Runnable {
             }
             pipesTests.setInput(input);
 
+            if (this.customPayloadPath != null && !this.customPayloadPath.isEmpty()) {
+                Object payload = loadPayload(this.customPayloadPath);
+                pipesTests.setPayload(payload);
+            }
+
             if (this.full) {
                 pipesTests.fullTest();
                 return;
@@ -75,8 +89,7 @@ public class MainTest implements Runnable {
                 File jsonFile = new File(this.extras);
                 ObjectMapper objectMapper = new ObjectMapper();
                 Map<String, Object> extrasMap = objectMapper.readValue(
-                        jsonFile,
-                        new TypeReference<Map<String, Object>>() {}
+                    jsonFile, new TypeReference<Map<String, Object>>() {}
                 );
                 pipesTests.setExtras(extrasMap);
                 pipesTests.testExtras();
@@ -96,6 +109,14 @@ public class MainTest implements Runnable {
         System.out.println("All tests finished.");
     }
 
+    private Object loadPayload(String jsonFilePath) {
+        File jsonFile = new File(jsonFilePath);
+        try {
+            return this.objectMapper.readValue(jsonFile, Map.class).get("payload");
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to load JSON from file: " + jsonFilePath, e);
+        }
+    }
 
     public static void main(String[] args) {
         int exitCode = new CommandLine(new MainTest()).execute(args);
