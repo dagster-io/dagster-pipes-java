@@ -24,6 +24,7 @@ public class PipesTests {
     private Map<String, Object> extras;
     private String jobName;
     private Object payload;
+    private Object metadata;
 
     void setInput(Map<String, String> input) {
         this.input = input;
@@ -55,6 +56,10 @@ public class PipesTests {
 
     void setPayload(Object payload) {
         this.payload = payload;
+    }
+
+    void setMetadata(Object metadata) {
+        this.metadata = metadata;
     }
 
     @Test

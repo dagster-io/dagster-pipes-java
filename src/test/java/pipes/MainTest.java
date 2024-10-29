@@ -9,7 +9,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 @CommandLine.Command(name = "main-test", mixinStandardHelpOptions = true)
 public class MainTest implements Runnable {
@@ -59,6 +58,12 @@ public class MainTest implements Runnable {
     )
     private String customPayloadPath;
 
+    @CommandLine.Option(
+        names = {"--metadata"},
+        description = "Specify path to metadata JSON for testing"
+    )
+    private String metadata;
+
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
@@ -73,8 +78,13 @@ public class MainTest implements Runnable {
             pipesTests.setInput(input);
 
             if (this.customPayloadPath != null && !this.customPayloadPath.isEmpty()) {
-                Object payload = loadPayload(this.customPayloadPath);
+                Object payload = loadJSONByWrapperKey(this.customPayloadPath, "payload");
                 pipesTests.setPayload(payload);
+            }
+
+            if (this.metadata != null && !this.metadata.isEmpty()) {
+                Object metadata = loadJSONByWrapperKey(this.metadata, "metadata");
+                pipesTests.setMetadata(metadata);
             }
 
             if (this.full) {
@@ -109,10 +119,10 @@ public class MainTest implements Runnable {
         System.out.println("All tests finished.");
     }
 
-    private Object loadPayload(String jsonFilePath) {
+    private Object loadJSONByWrapperKey(String jsonFilePath, String wrapperKey) {
         File jsonFile = new File(jsonFilePath);
         try {
-            return this.objectMapper.readValue(jsonFile, Map.class).get("payload");
+            return this.objectMapper.readValue(jsonFile, Map.class).get(wrapperKey);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load JSON from file: " + jsonFilePath, e);
         }
