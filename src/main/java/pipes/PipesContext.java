@@ -1,6 +1,6 @@
 package pipes;
 
-import com.fasterxml.jackson.databind.JsonSerializable;
+import generated.Metadata;
 import pipes.data.*;
 import pipes.loaders.PipesContextLoader;
 import pipes.loaders.PipesParamsLoader;
@@ -11,6 +11,7 @@ import pipes.writers.PipesMessageWriterChannel;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 public class PipesContext {
 
@@ -211,87 +212,136 @@ public class PipesContext {
         }
     }
 
-    // TODO:: Delete
-//    public void reportAssetMaterialization(
-//        Map<String, Object> metadata,
-//        String dataVersion,
-//        String assetKey
-//    ) {
-//        assetKey = resolveOptionallyPassedAssetKey(assetKey);
-//        if (materializedAssets.contains(assetKey)) {
-//            throw new IllegalStateException(
-//                "Asset key `" + assetKey + "` has already been materialized, cannot report additional data."
-//            );
-//        }
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("asset_key", assetKey);
-//        map.put("data_version", dataVersion);
-//        map.put("metadata", metadata);
-//        sendMessage("report_asset_materialization", map);
-//        materializedAssets.add(assetKey);
-//    }
-//
-//    public void reportAssetCheck(
-//        String checkName,
-//        boolean passed,
-//        String severity,
-//        Map<String, Object> metadata,
-//        String assetKey
-//    ) throws IOException {
-//        assetKey = resolveOptionallyPassedAssetKey(assetKey);
-//        Map<String, Object> map = new HashMap<>();
-//        map.put("asset_key", assetKey);
-//        map.put("check_name", checkName);
-//        map.put("passed", passed);
-//        map.put("metadata", metadata);
-//        map.put("severity", severity);
-//        sendMessage("report_asset_check", map);
-//    }
-//
-//
-//    public Logger getLogger() {
-//        return logger;
-//    }
-//
-//
-//    private void closeResources() {
-//        while (!ioStack.isEmpty()) {
-//            try {
-//                ioStack.pop().close();
-//            } catch (Exception e) {
-//                throw new RuntimeException("Error closing resources", e);
-//            }
-//        }
-//    }
-//
-//    private <T> T getDefinedAssetProperty(String key, String errorContext) {
-//        return assertDefinedProperty(data, key, errorContext);
-//    }
-//
-//    private <T> T getDefinedPartitionProperty(String key, String errorContext) {
-//        return assertDefinedProperty(data, key, errorContext);
-//    }
-//
-//    private <T> T assertDefinedProperty(
-//        PipesContextData pipesContextData,
-//        String key,
-//        String errorContext
-//    ) {
-//        if (!pipesContextData.containsKey(key)) {
-//            throw new IllegalArgumentException(errorContext + " is not defined.");
-//        }
-//        return (T) map.get(key);
-//    }
-//
-//
-//    private String resolveOptionallyPassedAssetKey(String assetKey) {
-//        if (assetKey == null) {
-//            List<String> assetKeys = data.getAssetKeys();
-//            if (assetKeys.size() != 1) {
-//                throw new IllegalStateException("Multiple assets in scope, specify the asset key.");
-//            }
-//            return assetKeys.get(0);
-//        }
-//        return assetKey;
-//    }
+    public void reportAssetMaterialization(
+        Map<String, Metadata> metadata,
+        String dataVersion,
+        String assetKey
+    ) throws DagsterPipesException, IOException {
+        Set<String> assetKeys = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_MATERIALIZATION);
+        if (this.materializedAssets.containsAll(assetKeys)) {
+            throw new IllegalStateException(
+                "Asset keys: " + assetKeys + " has already been materialized, cannot report additional data."
+            );
+        }
+        assertNotNull(metadata, Method.REPORT_ASSET_MATERIALIZATION, "metadata");
+        assertNotNull(dataVersion, Method.REPORT_ASSET_MATERIALIZATION, "dataVersion");
+        this.writeMessage(
+            Method.REPORT_ASSET_MATERIALIZATION,
+            this.createMap(assetKeys, dataVersion, metadata)
+        );
+        materializedAssets.addAll(assetKeys);
+    }
+
+    public void reportAssetCheck(
+        String checkName,
+        boolean passed,
+        Map<String, Metadata> metadata,
+        String assetKey
+    ) throws DagsterPipesException, IOException {
+        reportAssetCheck(
+            checkName, passed, PipesAssetCheckSeverity.ERROR, metadata, assetKey
+        );
+    }
+
+    public void reportAssetCheck(
+        String checkName,
+        boolean passed,
+        PipesAssetCheckSeverity severity,
+        Map<String, Metadata> metadata,
+        String assetKey
+    ) throws DagsterPipesException, IOException {
+        Set<String> assetKeys = resolveOptionallyPassedAssetKey(
+            assetKey, Method.REPORT_ASSET_CHECK
+        );
+        assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
+        assertNotNull(metadata, Method.REPORT_ASSET_CHECK, "metadata");
+        this.writeMessage(
+            Method.REPORT_ASSET_CHECK,
+            this.createMap(assetKeys, checkName, passed, severity, metadata)
+        );
+    }
+
+    private void assertNotNull(Object value, Method method, String param) throws DagsterPipesException {
+        if (value == null) {
+            throw new DagsterPipesException(
+                String.format(
+                    "Null parameter `%s` for %s",
+                    param, method.toValue()
+                )
+            );
+        }
+    }
+
+    private Map<String, Object> createMap(
+        Set<String> assetKey,
+        String dataVersion,
+        Map<String, Metadata> metadata
+    ) {
+        Map<String, Object> message = new HashMap<>();
+        message.put("asset_key", assetKey);
+        message.put("data_version", dataVersion);
+        message.put("metadata", metadata);
+        return message;
+    }
+
+    private Map<String, Object> createMap(
+        Set<String> assetKey,
+        String checkName,
+        boolean passed,
+        PipesAssetCheckSeverity severity,
+        Map<String, Metadata> metadata
+    ) {
+        Map<String, Object> message = new HashMap<>();
+        message.put("asset_key", assetKey);
+        message.put("check_name", checkName);
+        message.put("passed", passed);
+        message.put("severity", severity);
+        message.put("metadata", metadata);
+        return message;
+    }
+
+    private Set<String> resolveOptionallyPassedAssetKey(
+        String assetKey,
+        Method method
+    ) throws DagsterPipesException {
+        if (assetKey == null) {
+            throw new DagsterPipesException("Null assetKey.");
+        }
+        Set<String> splitAssetKeys = Arrays.stream(assetKey.split("/")).collect(Collectors.toSet());
+        splitAssetKeys = Collections.unmodifiableSet(splitAssetKeys);
+        List<String> definedAssetKeys = this.data.getAssetKeys();
+        if (!definedAssetKeys.isEmpty()) {
+            if (!new HashSet<>(definedAssetKeys).containsAll(splitAssetKeys)) {
+                throw new DagsterPipesException(
+                    String.format("Invalid asset key. Expected one of %s, got %s.",
+                        definedAssetKeys,
+                        splitAssetKeys
+                    )
+                );
+            }
+
+            if (splitAssetKeys.isEmpty()) {
+                if (definedAssetKeys.size() != 1) {
+                    throw new DagsterPipesException(
+                        String.format(
+                            "Calling %s without passing an asset key is undefined. Current step targets multiple assets.",
+                            method.toValue()
+                        )
+                    );
+                }
+                splitAssetKeys = Collections.singleton(definedAssetKeys.get(0));
+            }
+        }
+
+        if (splitAssetKeys.isEmpty()) {
+            throw new DagsterPipesException(
+                String.format(
+                    "Calling %s without passing an asset key is undefined. Current step does not target a specific asset.",
+                    method.toValue()
+                )
+            );
+        }
+
+        return splitAssetKeys;
+    }
 }
