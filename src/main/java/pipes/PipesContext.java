@@ -225,6 +225,9 @@ public class PipesContext {
                 "Asset keys: " + assetKeys + " has already been materialized, cannot report additional data."
             );
         }
+        if (assetKey == null) {
+            assetKey = assetKeys.get(0);
+        }
         this.writeMessage(
             Method.REPORT_ASSET_MATERIALIZATION,
             this.createMap(assetKey, dataVersion, metadata)
@@ -251,7 +254,10 @@ public class PipesContext {
         String assetKey
     ) throws DagsterPipesException, IOException {
         assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
-        resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
+        List<String> assetKeys = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
+        if (assetKey == null) {
+            assetKey = assetKeys.get(0);
+        }
         this.writeMessage(
             Method.REPORT_ASSET_CHECK,
             this.createMap(assetKey, checkName, passed, severity, metadata)
