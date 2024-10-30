@@ -123,24 +123,80 @@ def test_java_pipes_components(
 
 
 @parametrize("metadata", METADATA_LIST)
-@parametrize("custom_message_payload", CUSTOM_MESSAGE_PAYLOADS)
 @parametrize(
     "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
 )
-def test_java_pipes(
+def test_java_pipes_extras(
     context_injector: PipesContextInjector,
     metadata: Dict[str, Any],
-    custom_message_payload: Any,
     tmpdir_factory,
     capsys,
 ):
     work_dir = tmpdir_factory.mktemp("work_dir")
 
     metadata_path = work_dir / "metadata.json"
-    custom_payload_path = work_dir / "custom_payload.json"
 
     with open(str(metadata_path), "w") as f:
         json.dump(metadata, f)
+
+    @asset
+    def java_asset(
+        context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
+    ) -> MaterializeResult:
+        job_name = context.dagster_run.job_name
+
+        args = [
+            "java",
+            "-jar",
+            str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            "--full",
+            "--env",
+            f"--extras={metadata_path}",
+            f"--jobName={job_name}",
+        ]
+
+        invocation_result = pipes_subprocess_client.run(
+            context=context,
+            command=args,
+            extras=metadata,
+        )
+
+        materialization = invocation_result.get_materialize_result()
+
+        return materialization
+
+    result = materialize(
+        [java_asset],
+        resources={
+            "pipes_subprocess_client": PipesSubprocessClient(
+                context_injector=context_injector
+            )
+        },
+        raise_on_error=False,
+    )
+
+    assert result.success
+
+    captured = capsys.readouterr()
+
+    assert (
+        "[pipes] did not receive any messages from external process" not in captured.err
+    )
+
+
+@parametrize("custom_message_payload", CUSTOM_MESSAGE_PAYLOADS)
+@parametrize(
+    "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
+)
+def test_java_pipes_custom_message(
+    context_injector: PipesContextInjector,
+    custom_message_payload: Any,
+    tmpdir_factory,
+    capsys,
+):
+    work_dir = tmpdir_factory.mktemp("work_dir")
+
+    custom_payload_path = work_dir / "custom_payload.json"
 
     with open(str(custom_payload_path), "w") as f:
         json.dump({"payload": custom_message_payload}, f)
@@ -157,22 +213,79 @@ def test_java_pipes(
             str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
             "--full",
             "--env",
-            f"--extras={metadata_path}",
             f"--jobName={job_name}",
             "--custom-payload-path",
             str(custom_payload_path),
-            "--metadata",
-            str(metadata_path),
-
         ]
 
         invocation_result = pipes_subprocess_client.run(
             context=context,
             command=args,
-            extras=metadata,
         )
 
         assert invocation_result.get_custom_messages()[0] == custom_message_payload
+
+        materialization = invocation_result.get_materialize_result()
+
+        return materialization
+
+    result = materialize(
+        [java_asset],
+        resources={
+            "pipes_subprocess_client": PipesSubprocessClient(
+                context_injector=context_injector
+            )
+        },
+        raise_on_error=False,
+    )
+
+    assert result.success
+
+    captured = capsys.readouterr()
+
+    assert (
+        "[pipes] did not receive any messages from external process" not in captured.err
+    )
+
+
+@parametrize("metadata", METADATA_LIST)
+@parametrize(
+    "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
+)
+def test_java_pipes_report_asset_materialization(
+    context_injector: PipesContextInjector,
+    metadata: Dict[str, Any],
+    tmpdir_factory,
+    capsys,
+):
+    work_dir = tmpdir_factory.mktemp("work_dir")
+
+    metadata_path = work_dir / "metadata.json"
+
+    with open(str(metadata_path), "w") as f:
+        json.dump(metadata, f)
+
+    @asset
+    def java_asset(
+        context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
+    ) -> MaterializeResult:
+        job_name = context.dagster_run.job_name
+
+        args = [
+            "java",
+            "-jar",
+            str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            "--full",
+            "--env",
+            f"--jobName={job_name}",
+            "--metadata",
+            str(metadata_path),
+        ]
+
+        invocation_result = pipes_subprocess_client.run(
+            context=context,
+            command=args,
+        )
 
         materialization = invocation_result.get_materialize_result()
 
