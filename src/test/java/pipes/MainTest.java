@@ -2,7 +2,6 @@ package pipes;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.sun.org.apache.xpath.internal.operations.Bool;
 import generated.Metadata;
 import picocli.CommandLine;
 import pipes.data.PipesConstants;
