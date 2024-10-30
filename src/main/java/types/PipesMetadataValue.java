@@ -1,8 +1,9 @@
 package types;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
+import java.util.Map;
 
-public class Metadata {
+public class PipesMetadataValue {
     private RawValue rawValue;
     private Type type;
 
