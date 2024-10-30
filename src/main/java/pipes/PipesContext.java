@@ -213,7 +213,7 @@ public class PipesContext {
     }
 
     public void reportAssetMaterialization(
-        Map<String, Metadata> metadata,
+        Map<String, PipesMetadataValue> PipesMetadataValue,
         String dataVersion,
         String assetKey
     ) throws DagsterPipesException, IOException {
@@ -223,8 +223,8 @@ public class PipesContext {
                 "Asset keys: " + assetKeys + " has already been materialized, cannot report additional data."
             );
         }
-        if (metadata != null) {
-            metadata = normalizeMetadata(metadata);
+        if (PipesMetadataValue != null) {
+            PipesMetadataValue = normalizePipesMetadataValue(PipesMetadataValue);
         }
         if (assetKey == null) {
             assetKey = assetKeys.get(0);
@@ -233,7 +233,7 @@ public class PipesContext {
 
         this.writeMessage(
             Method.REPORT_ASSET_MATERIALIZATION,
-            this.createMap(assetKey, dataVersion, metadata)
+            this.createMap(assetKey, dataVersion, PipesMetadataValue)
         );
         materializedAssets.add(assetKeys);
     }
@@ -241,11 +241,11 @@ public class PipesContext {
     public void reportAssetCheck(
         String checkName,
         boolean passed,
-        Map<String, Metadata> metadata,
+        Map<String, PipesMetadataValue> PipesMetadataValue,
         String assetKey
     ) throws DagsterPipesException, IOException {
         reportAssetCheck(
-            checkName, passed, PipesAssetCheckSeverity.ERROR, metadata, assetKey
+            checkName, passed, PipesAssetCheckSeverity.ERROR, PipesMetadataValue, assetKey
         );
     }
 
@@ -253,27 +253,27 @@ public class PipesContext {
         String checkName,
         boolean passed,
         PipesAssetCheckSeverity severity,
-        Map<String, Metadata> metadata,
+        Map<String, PipesMetadataValue> PipesMetadataValue,
         String assetKey
     ) throws DagsterPipesException, IOException {
         assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
         List<String> assetKeys = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
-        if (metadata != null) {
-            metadata = normalizeMetadata(metadata);
+        if (PipesMetadataValue != null) {
+            PipesMetadataValue = normalizePipesMetadataValue(PipesMetadataValue);
         }
         if (assetKey == null) {
             assetKey = assetKeys.get(0);
         }
         this.writeMessage(
             Method.REPORT_ASSET_CHECK,
-            this.createMap(assetKey, checkName, passed, severity, metadata)
+            this.createMap(assetKey, checkName, passed, severity, PipesMetadataValue)
         );
     }
 
-    private static Map<String, Metadata> normalizeMetadata(Map<String, Metadata> metadata) {
-        Map<String, Metadata> newMetadata = new HashMap<>();
+    private static Map<String, PipesMetadataValue> normalizePipesMetadataValue(Map<String, PipesMetadataValue> PipesMetadataValue) {
+        Map<String, PipesMetadataValue> newPipesMetadataValue = new HashMap<>();
         // TODO:: add logic here
-        return newMetadata;
+        return newPipesMetadataValue;
     }
 
     private void assertNotNull(Object value, Method method, String param) throws DagsterPipesException {
@@ -290,12 +290,12 @@ public class PipesContext {
     private Map<String, Object> createMap(
         String assetKey,
         String dataVersion,
-        Map<String, Metadata> metadata
+        Map<String, PipesMetadataValue> PipesMetadataValue
     ) {
         Map<String, Object> message = new HashMap<>();
         message.put("asset_key", assetKey);
         message.put("data_version", dataVersion);
-        message.put("metadata", metadata);
+        message.put("PipesMetadataValue", PipesMetadataValue);
         return message;
     }
 
@@ -304,14 +304,14 @@ public class PipesContext {
         String checkName,
         boolean passed,
         PipesAssetCheckSeverity severity,
-        Map<String, Metadata> metadata
+        Map<String, PipesMetadataValue> PipesMetadataValue
     ) {
         Map<String, Object> message = new HashMap<>();
         message.put("asset_key", assetKey);
         message.put("check_name", checkName);
         message.put("passed", passed);
         message.put("severity", severity);
-        message.put("metadata", metadata);
+        message.put("PipesMetadataValue", PipesMetadataValue);
         return message;
     }
 

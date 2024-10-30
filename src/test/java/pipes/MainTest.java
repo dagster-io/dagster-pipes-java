@@ -2,9 +2,9 @@ package pipes;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import types.Metadata;
 import picocli.CommandLine;
 import pipes.data.PipesConstants;
+import types.PipesMetadataValue;
 
 import java.io.File;
 import java.io.IOException;
@@ -94,7 +94,7 @@ public class MainTest implements Runnable {
 
             if (this.reportAssetMaterializationJson != null && !this.reportAssetMaterializationJson.isEmpty()) {
                 cacheJson(this.reportAssetMaterializationJson);
-                Map<String, Metadata> metadata = loadParamByWrapperKey("metadata", Map.class);
+                Map<String, PipesMetadataValue> metadata = loadParamByWrapperKey("metadata", Map.class);
                 String dataVersion = loadParamByWrapperKey("dataVersion", String.class);
                 String assetKey = loadParamByWrapperKey("assetKey", String.class);
                 pipesTests.setMaterialization(metadata, dataVersion, assetKey);
@@ -104,7 +104,7 @@ public class MainTest implements Runnable {
                 cacheJson(this.reportAssetCheckJson);
                 String checkName = loadParamByWrapperKey("checkName", String.class);
                 boolean passed = loadParamByWrapperKey("passed", Boolean.class);
-                Map<String, Metadata> metadata = loadParamByWrapperKey("metadata", Map.class);
+                Map<String, PipesMetadataValue> metadata = loadParamByWrapperKey("metadata", Map.class);
                 String assetKey = loadParamByWrapperKey("assetKey", String.class);
                 pipesTests.setCheck(checkName, passed, metadata, assetKey);
             }

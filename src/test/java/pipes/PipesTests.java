@@ -1,6 +1,5 @@
 package pipes;
 
-import types.Metadata;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -10,6 +9,7 @@ import pipes.loaders.PipesDefaultContextLoader;
 import pipes.loaders.PipesEnvVarParamsLoader;
 import pipes.loaders.PipesParamsLoader;
 import pipes.writers.*;
+import types.PipesMetadataValue;
 
 import java.io.File;
 import java.io.IOException;
@@ -28,7 +28,7 @@ public class PipesTests {
 
     //Related to reportAssetMaterialization
     private boolean materialization = false;
-    private Map<String, Metadata> materializationMetadata;
+    private Map<String, PipesMetadataValue> materializationMetadata;
     private String dataVersion;
     private String materializationAssetKey;
 
@@ -36,7 +36,7 @@ public class PipesTests {
     private boolean check = false;
     private String checkName;
     private boolean passed;
-    private Map<String, Metadata> checkMetadata;
+    private Map<String, PipesMetadataValue> checkMetadata;
     private String checkAssetKey;
 
     void setInput(Map<String, String> input) {
@@ -72,7 +72,7 @@ public class PipesTests {
     }
 
     void setMaterialization(
-        Map<String, Metadata> metadata, String dataVersion, String assetKey
+        Map<String, PipesMetadataValue> metadata, String dataVersion, String assetKey
     ) {
         this.materialization = true;
         this.materializationMetadata = metadata;
@@ -81,7 +81,7 @@ public class PipesTests {
     }
 
     void setCheck(
-        String checkName, boolean passed, Map<String, Metadata> metadata, String assetKey
+        String checkName, boolean passed, Map<String, PipesMetadataValue> metadata, String assetKey
     ) {
         this.check = true;
         this.checkName = checkName;
