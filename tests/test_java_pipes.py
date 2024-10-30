@@ -14,6 +14,7 @@ from pytest_cases import parametrize
 from dagster._core.pipes.utils import (
     PipesEnvContextInjector,
     PipesTempFileContextInjector,
+    PipesFileMessageReader,
 )
 from dagster._core.pipes.client import PipesContextInjector
 import json
@@ -252,18 +253,22 @@ def test_java_pipes_report_asset_materialization(
 ):
     work_dir = tmpdir_factory.mktemp("work_dir")
 
+    messages_file = work_dir / "messages"
+
     asset_materialization_dict = {}
 
     if metadata is not None:
         asset_materialization_dict["metadata"] = metadata
 
     if data_version is not None:
-        asset_materialization_dict["data_version"] = data_version
+        asset_materialization_dict["dataVersion"] = data_version
 
     if asset_key is not None:
-        asset_materialization_dict["asset_key"] = asset_key
+        asset_materialization_dict["assetKey"] = "/".join(asset_key)
 
     asset_materialization_path = work_dir / "asset_materialization.json"
+
+    print(asset_materialization_dict)
 
     with open(str(asset_materialization_path), "w") as f:
         json.dump(asset_materialization_dict, f)
@@ -300,7 +305,11 @@ def test_java_pipes_report_asset_materialization(
 
     result = materialize(
         [java_asset],
-        resources={"pipes_subprocess_client": PipesSubprocessClient()},
+        resources={
+            "pipes_subprocess_client": PipesSubprocessClient(
+                message_reader=PipesFileMessageReader(str(messages_file))
+            )
+        },
         raise_on_error=False,
     )
 
