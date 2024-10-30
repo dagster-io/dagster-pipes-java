@@ -1,6 +1,6 @@
 package pipes;
 
-import generated.Metadata;
+import types.Metadata;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;

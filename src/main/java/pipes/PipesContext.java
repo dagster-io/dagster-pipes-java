@@ -1,12 +1,15 @@
 package pipes;
 
-import generated.Metadata;
+import types.Metadata;
 import pipes.data.*;
 import pipes.loaders.PipesContextLoader;
 import pipes.loaders.PipesParamsLoader;
 import pipes.utils.PipesUtils;
 import pipes.writers.PipesMessageWriter;
 import pipes.writers.PipesMessageWriterChannel;
+import types.Method;
+import types.PartitionKeyRange;
+import types.PartitionTimeWindow;
 
 import java.io.IOException;
 import java.util.*;
@@ -298,34 +301,28 @@ public class PipesContext {
         String assetKey,
         Method method
     ) throws DagsterPipesException {
+        List<String> definedAssetKeys = this.data.getAssetKeys();
         List<String> splitAssetKeys;
         if (assetKey == null) {
-            splitAssetKeys = Collections.emptyList();
+            if (definedAssetKeys.size() != 1) {
+                throw new DagsterPipesException(
+                    String.format(
+                        "Calling %s without passing an asset key is undefined. Current step targets multiple assets.",
+                        method.toValue()
+                    )
+                );
+            }
+            splitAssetKeys = Collections.singletonList(definedAssetKeys.get(0));
         } else {
             splitAssetKeys = Arrays.asList(assetKey.split("/"));
             splitAssetKeys = Collections.unmodifiableList(splitAssetKeys);
-        }
-        List<String> definedAssetKeys = this.data.getAssetKeys();
-        if (!definedAssetKeys.isEmpty()) {
-            if (definedAssetKeys.equals(splitAssetKeys)) {
+            if (!definedAssetKeys.equals(splitAssetKeys)) {
                 throw new DagsterPipesException(
                     String.format("Invalid asset key. Expected one of %s, got %s.",
                         definedAssetKeys,
                         splitAssetKeys
                     )
                 );
-            }
-
-            if (splitAssetKeys.isEmpty()) {
-                if (definedAssetKeys.size() != 1) {
-                    throw new DagsterPipesException(
-                        String.format(
-                            "Calling %s without passing an asset key is undefined. Current step targets multiple assets.",
-                            method.toValue()
-                        )
-                    );
-                }
-                splitAssetKeys = Collections.singletonList(definedAssetKeys.get(0));
             }
         }
 

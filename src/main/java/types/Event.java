@@ -1,6 +1,7 @@
-package io.quicktype;
+package types;
 
 import com.fasterxml.jackson.annotation.*;
+
 import java.util.Map;
 
 public class Event {

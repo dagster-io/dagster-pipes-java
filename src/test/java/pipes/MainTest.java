@@ -2,7 +2,7 @@ package pipes;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import generated.Metadata;
+import types.Metadata;
 import picocli.CommandLine;
 import pipes.data.PipesConstants;
 

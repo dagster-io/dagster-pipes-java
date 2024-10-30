@@ -1,7 +1,6 @@
-package io.quicktype;
+package types;
 
-import com.fasterxml.jackson.annotation.*;
-import java.util.Map;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Metadata {
     private RawValue rawValue;

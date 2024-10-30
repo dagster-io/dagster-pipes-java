@@ -2,6 +2,8 @@ package pipes.writers;
 
 import java.util.Map;
 
+import static pipes.data.PipesConstants.PIPES_PROTOCOL_VERSION_FIELD;
+
 public class PipesMessage {
 
     private String dagsterPipesVersion;
@@ -45,8 +47,8 @@ public class PipesMessage {
     @Override
     public String toString() {
         return String.format(
-            "PipesMessage{dagsterPipesVersion='%s\\, method=%s\\, params=%s\\}",
-            dagsterPipesVersion, method, params
+            "PipesMessage{%s='%s\\, method=%s\\, params=%s\\}",
+            PIPES_PROTOCOL_VERSION_FIELD, dagsterPipesVersion, method, params
         );
     }
 }
