@@ -185,11 +185,7 @@ def test_java_pipes_extras(
 
 
 @parametrize("custom_message_payload", CUSTOM_MESSAGE_PAYLOADS)
-@parametrize(
-    "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
-)
 def test_java_pipes_custom_message(
-    context_injector: PipesContextInjector,
     custom_message_payload: Any,
     tmpdir_factory,
     capsys,
@@ -231,11 +227,7 @@ def test_java_pipes_custom_message(
 
     result = materialize(
         [java_asset],
-        resources={
-            "pipes_subprocess_client": PipesSubprocessClient(
-                context_injector=context_injector
-            )
-        },
+        resources={"pipes_subprocess_client": PipesSubprocessClient()},
         raise_on_error=False,
     )
 
@@ -249,11 +241,7 @@ def test_java_pipes_custom_message(
 
 
 @parametrize("metadata", METADATA_LIST)
-@parametrize(
-    "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
-)
 def test_java_pipes_report_asset_materialization(
-    context_injector: PipesContextInjector,
     metadata: Dict[str, Any],
     tmpdir_factory,
     capsys,
@@ -293,11 +281,7 @@ def test_java_pipes_report_asset_materialization(
 
     result = materialize(
         [java_asset],
-        resources={
-            "pipes_subprocess_client": PipesSubprocessClient(
-                context_injector=context_injector
-            )
-        },
+        resources={"pipes_subprocess_client": PipesSubprocessClient()},
         raise_on_error=False,
     )
 
