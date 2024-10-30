@@ -224,7 +224,7 @@ public class PipesContext {
         }
         this.writeMessage(
             Method.REPORT_ASSET_MATERIALIZATION,
-            this.createMap(assetKeys, dataVersion, metadata)
+            this.createMap(assetKey, dataVersion, metadata)
         );
         materializedAssets.add(assetKeys);
     }
@@ -248,12 +248,10 @@ public class PipesContext {
         String assetKey
     ) throws DagsterPipesException, IOException {
         assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
-        List<String> assetKeys = resolveOptionallyPassedAssetKey(
-            assetKey, Method.REPORT_ASSET_CHECK
-        );
+        resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
         this.writeMessage(
             Method.REPORT_ASSET_CHECK,
-            this.createMap(assetKeys, checkName, passed, severity, metadata)
+            this.createMap(assetKey, checkName, passed, severity, metadata)
         );
     }
 
@@ -269,7 +267,7 @@ public class PipesContext {
     }
 
     private Map<String, Object> createMap(
-        List<String> assetKey,
+        String assetKey,
         String dataVersion,
         Map<String, Metadata> metadata
     ) {
@@ -281,7 +279,7 @@ public class PipesContext {
     }
 
     private Map<String, Object> createMap(
-        List<String> assetKey,
+        String assetKey,
         String checkName,
         boolean passed,
         PipesAssetCheckSeverity severity,
