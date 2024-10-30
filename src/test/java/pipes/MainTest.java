@@ -88,7 +88,7 @@ public class MainTest implements Runnable {
 
             if (this.customPayloadPath != null && !this.customPayloadPath.isEmpty()) {
                 cacheJson(this.customPayloadPath);
-                Object payload = loadParamByWrapperKey("payload", Map.class);
+                Object payload = loadParamByWrapperKey("payload", Object.class);
                 pipesTests.setPayload(payload);
             }
 
