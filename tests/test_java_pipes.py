@@ -32,7 +32,8 @@ def built_jar():
     subprocess.run(["./gradlew", "build"], check=True)
 
 
-EXTRAS_LIST = [
+# metadata must have string keys
+METADATA_LIST = [
     {
         "foo": "bar",
     },
@@ -61,7 +62,8 @@ EXTRAS_LIST = [
 ]
 
 
-CUSTOM_MESSAGE_PAYLOADS = EXTRAS_LIST.copy() + [
+# this is just any json
+CUSTOM_MESSAGE_PAYLOADS = METADATA_LIST.copy() + [
     1,
     1.0,
     "foo",
@@ -69,13 +71,13 @@ CUSTOM_MESSAGE_PAYLOADS = EXTRAS_LIST.copy() + [
 ]
 
 
-@parametrize("extras", EXTRAS_LIST)
+@parametrize("metadata", METADATA_LIST)
 @parametrize(
     "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
 )
 def test_java_pipes_components(
     context_injector: PipesContextInjector,
-    extras: Dict[str, Any],
+    metadata: Dict[str, Any],
     tmpdir_factory,
     capsys,
 ):
@@ -84,7 +86,7 @@ def test_java_pipes_components(
     extras_path = work_dir / "extras.json"
 
     with open(str(extras_path), "w") as f:
-        json.dump(extras, f)
+        json.dump(metadata, f)
 
     @asset
     def java_asset(
@@ -104,7 +106,7 @@ def test_java_pipes_components(
         return pipes_subprocess_client.run(
             context=context,
             command=args,
-            extras=extras,
+            extras=metadata,
         ).get_materialize_result()
 
     result = materialize(
@@ -120,25 +122,25 @@ def test_java_pipes_components(
     assert result.success
 
 
-@parametrize("extras", EXTRAS_LIST)
+@parametrize("metadata", METADATA_LIST)
 @parametrize("custom_message_payload", CUSTOM_MESSAGE_PAYLOADS)
 @parametrize(
     "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
 )
 def test_java_pipes(
     context_injector: PipesContextInjector,
-    extras: Dict[str, Any],
+    metadata: Dict[str, Any],
     custom_message_payload: Any,
     tmpdir_factory,
     capsys,
 ):
     work_dir = tmpdir_factory.mktemp("work_dir")
 
-    extras_path = work_dir / "extras.json"
+    metadata_path = work_dir / "metadata.json"
     custom_payload_path = work_dir / "custom_payload.json"
 
-    with open(str(extras_path), "w") as f:
-        json.dump(extras, f)
+    with open(str(metadata_path), "w") as f:
+        json.dump(metadata, f)
 
     with open(str(custom_payload_path), "w") as f:
         json.dump({"payload": custom_message_payload}, f)
@@ -153,18 +155,21 @@ def test_java_pipes(
             "java",
             "-jar",
             str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            "--full",
             "--env",
-            f"--extras={str(extras_path)}",
+            f"--extras={metadata_path}",
             f"--jobName={job_name}",
             "--custom-payload-path",
             str(custom_payload_path),
-            "--full",
+            "--metadata",
+            str(metadata_path),
+
         ]
 
         invocation_result = pipes_subprocess_client.run(
             context=context,
             command=args,
-            extras=extras,
+            extras=metadata,
         )
 
         assert invocation_result.get_custom_messages()[0] == custom_message_payload
