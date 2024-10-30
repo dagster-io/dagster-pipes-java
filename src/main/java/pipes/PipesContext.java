@@ -1,15 +1,12 @@
 package pipes;
 
-import types.Metadata;
+import types.*;
 import pipes.data.*;
 import pipes.loaders.PipesContextLoader;
 import pipes.loaders.PipesParamsLoader;
 import pipes.utils.PipesUtils;
 import pipes.writers.PipesMessageWriter;
 import pipes.writers.PipesMessageWriterChannel;
-import types.Method;
-import types.PartitionKeyRange;
-import types.PartitionTimeWindow;
 
 import java.io.IOException;
 import java.util.*;
@@ -90,6 +87,7 @@ public class PipesContext {
         if (this.closed) {
             throw new DagsterPipesException("Cannot send message after pipes context is closed.");
         }
+        System.out.println(PipesUtils.makeMessage(method, params));
         this.messageChannel.writeMessage(PipesUtils.makeMessage(method, params));
     }
 
@@ -225,9 +223,14 @@ public class PipesContext {
                 "Asset keys: " + assetKeys + " has already been materialized, cannot report additional data."
             );
         }
+        if (metadata != null) {
+            metadata = normalizeMetadata(metadata);
+        }
         if (assetKey == null) {
             assetKey = assetKeys.get(0);
         }
+        System.out.println("writing message...");
+
         this.writeMessage(
             Method.REPORT_ASSET_MATERIALIZATION,
             this.createMap(assetKey, dataVersion, metadata)
@@ -262,6 +265,20 @@ public class PipesContext {
             Method.REPORT_ASSET_CHECK,
             this.createMap(assetKey, checkName, passed, severity, metadata)
         );
+    }
+
+    private static Map<String, Metadata> normalizeMetadata(Map<String, Metadata> metadata) {
+        Map<String, Metadata> newMetadata = new HashMap<>();
+        for (Map.Entry<String, Metadata> entry : metadata.entrySet()) {
+            String key = entry.getKey();
+            Metadata current = entry.getValue();
+            if (current instanceof Metadata) {
+
+            } else {
+
+            }
+        }
+        return newMetadata;
     }
 
     private void assertNotNull(Object value, Method method, String param) throws DagsterPipesException {
@@ -308,6 +325,7 @@ public class PipesContext {
         Method method
     ) throws DagsterPipesException {
         List<String> definedAssetKeys = this.data.getAssetKeys();
+        System.out.println("definedAssetKeys " + definedAssetKeys.size());
         List<String> splitAssetKeys;
         if (assetKey == null) {
             if (definedAssetKeys.size() != 1) {
