@@ -5,7 +5,7 @@ from dagster import (
     asset,
     materialize,
 )
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from pathlib import Path
 import subprocess
@@ -240,18 +240,28 @@ def test_java_pipes_custom_message(
     )
 
 
-@parametrize("metadata", METADATA_LIST)
+@parametrize("metadata", METADATA_LIST + [None])
+@parametrize("data_version", [None, "alpha"])
 def test_java_pipes_report_asset_materialization(
-    metadata: Dict[str, Any],
+    metadata: Optional[Dict[str, Any]],
+    data_version: Optional[str],
     tmpdir_factory,
     capsys,
 ):
     work_dir = tmpdir_factory.mktemp("work_dir")
 
-    metadata_path = work_dir / "metadata.json"
+    asset_materialization_dict = {}
 
-    with open(str(metadata_path), "w") as f:
-        json.dump(metadata, f)
+    if metadata is not None:
+        asset_materialization_dict["metadata"] = metadata
+
+    if data_version is not None:
+        asset_materialization_dict["data_version"] = data_version
+
+    asset_materialization_path = work_dir / "asset_materialization.json"
+
+    with open(str(asset_materialization_path), "w") as f:
+        json.dump(asset_materialization_dict, f)
 
     @asset
     def java_asset(
@@ -266,8 +276,8 @@ def test_java_pipes_report_asset_materialization(
             "--full",
             "--env",
             f"--jobName={job_name}",
-            "--metadata",
-            str(metadata_path),
+            "--report-asset-materialization",
+            str(asset_materialization_path),
         ]
 
         invocation_result = pipes_subprocess_client.run(
