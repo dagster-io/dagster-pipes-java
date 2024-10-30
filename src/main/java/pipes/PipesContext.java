@@ -11,14 +11,13 @@ import pipes.writers.PipesMessageWriterChannel;
 import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
-import java.util.stream.Collectors;
 
 public class PipesContext {
 
     private static PipesContext instance = null;
     private PipesContextData data = null;
     private PipesMessageWriterChannel messageChannel = null;
-    private final Set<String> materializedAssets;
+    private final Set<List<String>> materializedAssets;
     private boolean closed;
     private final Logger logger;
     private Exception exception;
@@ -217,19 +216,17 @@ public class PipesContext {
         String dataVersion,
         String assetKey
     ) throws DagsterPipesException, IOException {
-        Set<String> assetKeys = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_MATERIALIZATION);
-        if (this.materializedAssets.containsAll(assetKeys)) {
+        List<String> assetKeys = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_MATERIALIZATION);
+        if (this.materializedAssets.contains(assetKeys)) {
             throw new IllegalStateException(
                 "Asset keys: " + assetKeys + " has already been materialized, cannot report additional data."
             );
         }
-        assertNotNull(metadata, Method.REPORT_ASSET_MATERIALIZATION, "metadata");
-        assertNotNull(dataVersion, Method.REPORT_ASSET_MATERIALIZATION, "dataVersion");
         this.writeMessage(
             Method.REPORT_ASSET_MATERIALIZATION,
             this.createMap(assetKeys, dataVersion, metadata)
         );
-        materializedAssets.addAll(assetKeys);
+        materializedAssets.add(assetKeys);
     }
 
     public void reportAssetCheck(
@@ -250,11 +247,10 @@ public class PipesContext {
         Map<String, Metadata> metadata,
         String assetKey
     ) throws DagsterPipesException, IOException {
-        Set<String> assetKeys = resolveOptionallyPassedAssetKey(
+        assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
+        List<String> assetKeys = resolveOptionallyPassedAssetKey(
             assetKey, Method.REPORT_ASSET_CHECK
         );
-        assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
-        assertNotNull(metadata, Method.REPORT_ASSET_CHECK, "metadata");
         this.writeMessage(
             Method.REPORT_ASSET_CHECK,
             this.createMap(assetKeys, checkName, passed, severity, metadata)
@@ -273,7 +269,7 @@ public class PipesContext {
     }
 
     private Map<String, Object> createMap(
-        Set<String> assetKey,
+        List<String> assetKey,
         String dataVersion,
         Map<String, Metadata> metadata
     ) {
@@ -285,7 +281,7 @@ public class PipesContext {
     }
 
     private Map<String, Object> createMap(
-        Set<String> assetKey,
+        List<String> assetKey,
         String checkName,
         boolean passed,
         PipesAssetCheckSeverity severity,
@@ -300,18 +296,20 @@ public class PipesContext {
         return message;
     }
 
-    private Set<String> resolveOptionallyPassedAssetKey(
+    private List<String> resolveOptionallyPassedAssetKey(
         String assetKey,
         Method method
     ) throws DagsterPipesException {
+        List<String> splitAssetKeys;
         if (assetKey == null) {
-            throw new DagsterPipesException("Null assetKey.");
+            splitAssetKeys = Collections.emptyList();
+        } else {
+            splitAssetKeys = Arrays.asList(assetKey.split("/"));
+            splitAssetKeys = Collections.unmodifiableList(splitAssetKeys);
         }
-        Set<String> splitAssetKeys = Arrays.stream(assetKey.split("/")).collect(Collectors.toSet());
-        splitAssetKeys = Collections.unmodifiableSet(splitAssetKeys);
         List<String> definedAssetKeys = this.data.getAssetKeys();
         if (!definedAssetKeys.isEmpty()) {
-            if (!new HashSet<>(definedAssetKeys).containsAll(splitAssetKeys)) {
+            if (definedAssetKeys.equals(splitAssetKeys)) {
                 throw new DagsterPipesException(
                     String.format("Invalid asset key. Expected one of %s, got %s.",
                         definedAssetKeys,
@@ -329,7 +327,7 @@ public class PipesContext {
                         )
                     );
                 }
-                splitAssetKeys = Collections.singleton(definedAssetKeys.get(0));
+                splitAssetKeys = Collections.singletonList(definedAssetKeys.get(0));
             }
         }
 

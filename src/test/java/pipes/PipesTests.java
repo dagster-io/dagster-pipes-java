@@ -1,5 +1,6 @@
 package pipes;
 
+import generated.Metadata;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -24,7 +25,19 @@ public class PipesTests {
     private Map<String, Object> extras;
     private String jobName;
     private Object payload;
-    private Object metadata;
+
+    //Related to reportAssetMaterialization
+    private boolean materialization = false;
+    private Map<String, Metadata> materializationMetadata;
+    private String dataVersion;
+    private String materializationAssetKey;
+
+    //Related to reportAssetCheck
+    private boolean check = false;
+    private String checkName;
+    private boolean passed;
+    private Map<String, Metadata> checkMetadata;
+    private String checkAssetKey;
 
     void setInput(Map<String, String> input) {
         this.input = input;
@@ -58,8 +71,23 @@ public class PipesTests {
         this.payload = payload;
     }
 
-    void setMetadata(Object metadata) {
-        this.metadata = metadata;
+    void setMaterialization(
+        Map<String, Metadata> metadata, String dataVersion, String assetKey
+    ) {
+        this.materialization = true;
+        this.materializationMetadata = metadata;
+        this.dataVersion = dataVersion;
+        this.materializationAssetKey = assetKey;
+    }
+
+    void setCheck(
+        String checkName, boolean passed, Map<String, Metadata> metadata, String assetKey
+    ) {
+        this.check = true;
+        this.checkName = checkName;
+        this.passed = passed;
+        this.checkMetadata = metadata;
+        this.checkAssetKey = assetKey;
     }
 
     @Test
@@ -110,6 +138,16 @@ public class PipesTests {
             if (this.payload != null) {
                 session.getContext().reportCustomMessage(this.payload);
                 System.out.println("Payload reported with custom message.");
+            }
+            if (this.materialization) {
+                session.getContext().reportAssetMaterialization(
+                    this.materializationMetadata, this.dataVersion, this.materializationAssetKey
+                );
+            }
+            if (this.check) {
+                session.getContext().reportAssetCheck(
+                    this.checkName, this.passed, this.checkMetadata, this.checkAssetKey
+                );
             }
         } catch (Exception exception) {
             pipesContext.reportException(exception);
