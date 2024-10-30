@@ -258,6 +258,9 @@ public class PipesContext {
     ) throws DagsterPipesException, IOException {
         assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
         List<String> assetKeys = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
+        if (metadata != null) {
+            metadata = normalizeMetadata(metadata);
+        }
         if (assetKey == null) {
             assetKey = assetKeys.get(0);
         }
@@ -269,15 +272,7 @@ public class PipesContext {
 
     private static Map<String, Metadata> normalizeMetadata(Map<String, Metadata> metadata) {
         Map<String, Metadata> newMetadata = new HashMap<>();
-        for (Map.Entry<String, Metadata> entry : metadata.entrySet()) {
-            String key = entry.getKey();
-            Metadata current = entry.getValue();
-            if (current instanceof Metadata) {
-
-            } else {
-
-            }
-        }
+        // TODO:: add logic here
         return newMetadata;
     }
 
