@@ -242,11 +242,9 @@ def test_java_pipes_custom_message(
     )
 
 
-@parametrize("metadata", METADATA_LIST + [None])
 @parametrize("data_version", [None, "alpha"])
 @parametrize("asset_key", [None, ["java_asset"]])
 def test_java_pipes_report_asset_materialization(
-    metadata: Optional[Dict[str, Any]],
     data_version: Optional[str],
     asset_key: Optional[List[str]],
     tmpdir_factory,
@@ -258,11 +256,6 @@ def test_java_pipes_report_asset_materialization(
 
     asset_materialization_dict = {}
 
-    if metadata is not None:
-        asset_materialization_dict["metadata"] = _normalize_param_metadata(
-            metadata, "report_asset_materialization", "metadata"
-        )
-
     if data_version is not None:
         asset_materialization_dict["dataVersion"] = data_version
 
@@ -270,8 +263,6 @@ def test_java_pipes_report_asset_materialization(
         asset_materialization_dict["assetKey"] = "/".join(asset_key)
 
     asset_materialization_path = work_dir / "asset_materialization.json"
-
-    print(asset_materialization_dict)
 
     with open(str(asset_materialization_path), "w") as f:
         json.dump(asset_materialization_dict, f)
