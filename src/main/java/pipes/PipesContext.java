@@ -46,7 +46,7 @@ public class PipesContext {
         this.exception = exception;
     }
 
-    public void close() throws IOException {
+    public void close() throws Exception {
         if (!this.closed) {
             Map<String, Object> payload = new HashMap<>();
             if (this.exception != null) {
@@ -54,6 +54,9 @@ public class PipesContext {
             }
             this.messageChannel.writeMessage(PipesUtils.makeMessage(Method.CLOSED, payload));
             this.closed = true;
+            if (this.exception !=  null) {
+                throw this.exception;
+            }
         }
     }
 
@@ -290,7 +293,7 @@ public class PipesContext {
         Map<String, Object> message = new HashMap<>();
         message.put("asset_key", assetKey);
         message.put("data_version", dataVersion);
-        message.put("pipesMetadata", pipesMetadata);
+        message.put("metadata", pipesMetadata);
         return message;
     }
 
@@ -306,7 +309,7 @@ public class PipesContext {
         message.put("check_name", checkName);
         message.put("passed", passed);
         message.put("severity", severity);
-        message.put("pipesMetadata", pipesMetadata);
+        message.put("metadata", pipesMetadata);
         return message;
     }
 
