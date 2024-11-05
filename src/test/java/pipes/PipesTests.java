@@ -133,7 +133,7 @@ public class PipesTests {
     }
 
     @Test
-    public void fullTest() throws Exception {
+    public void fullTest() throws DagsterPipesException, IOException {
         PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
         PipesContextLoader contextLoader = new PipesDefaultContextLoader();
         PipesMessageWriter messageWriter = new PipesDefaultMessageWriter();
@@ -146,10 +146,8 @@ public class PipesTests {
                 System.out.println("Payload reported with custom message.");
             }
 
-            System.out.println("before this mat " + this.materialization + this.metadata);
             if (this.materialization) {
                 this.buildTestMetadata();
-                System.out.println("reportingAssetMat...");
                 session.getContext().reportAssetMaterialization(
                     this.metadata, this.dataVersion, this.materializationAssetKey
                 );
@@ -194,7 +192,6 @@ public class PipesTests {
             jsonMap.put("quux", inner);
             jsonMap.put("corge", null);
             this.metadata.put("json", new PipesMetadata(jsonMap, Type.JSON));
-            System.out.println("abcdef");
         }
     }
 }
