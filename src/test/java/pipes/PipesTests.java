@@ -10,6 +10,8 @@ import pipes.loaders.PipesEnvVarParamsLoader;
 import pipes.loaders.PipesParamsLoader;
 import pipes.writers.*;
 import types.PipesMetadataValue;
+import types.RawValue;
+import types.Type;
 
 import java.io.File;
 import java.io.IOException;
@@ -26,9 +28,12 @@ public class PipesTests {
     private String jobName;
     private Object payload;
 
+    private Map<String, PipesMetadata> metadata;
+
     //Related to reportAssetMaterialization
     private boolean materialization = false;
-    private Map<String, PipesMetadataValue> materializationMetadata;
+    // TODO:: remove?
+    //  private Map<String, PipesMetadataValue> materializationMetadata;
     private String dataVersion;
     private String materializationAssetKey;
 
@@ -36,7 +41,8 @@ public class PipesTests {
     private boolean check = false;
     private String checkName;
     private boolean passed;
-    private Map<String, PipesMetadataValue> checkMetadata;
+    // TODO:: remove?
+    //  private Map<String, PipesMetadataValue> checkMetadata;
     private String checkAssetKey;
 
     void setInput(Map<String, String> input) {
@@ -75,7 +81,7 @@ public class PipesTests {
         Map<String, PipesMetadataValue> metadata, String dataVersion, String assetKey
     ) {
         this.materialization = true;
-        this.materializationMetadata = metadata;
+        //this.materializationMetadata = metadata;
         this.dataVersion = dataVersion;
         this.materializationAssetKey = assetKey;
     }
@@ -86,7 +92,7 @@ public class PipesTests {
         this.check = true;
         this.checkName = checkName;
         this.passed = passed;
-        this.checkMetadata = metadata;
+        //this.checkMetadata = metadata;
         this.checkAssetKey = assetKey;
     }
 
@@ -120,8 +126,8 @@ public class PipesTests {
             File file = new File(((PipesFileMessageWriterChannel) this.writer).getPath());
             Assertions.assertTrue(file.exists());
             Assertions.assertEquals(
-                    "{\"dagsterPipesVersion\":\"1.0\",\"method\":\"bla\",\"params\":{\"1\":1,\"2\":2}}",
-                    TestUtils.getLastLine(file.getPath())
+                "{\"dagsterPipesVersion\":\"1.0\",\"method\":\"bla\",\"params\":{\"1\":1,\"2\":2}}",
+                TestUtils.getLastLine(file.getPath())
             );
         }
     }
@@ -140,17 +146,51 @@ public class PipesTests {
                 System.out.println("Payload reported with custom message.");
             }
             if (this.materialization) {
+                buildTestMetadata();
                 session.getContext().reportAssetMaterialization(
-                    this.materializationMetadata, this.dataVersion, this.materializationAssetKey
+                    this.metadata, this.dataVersion, this.materializationAssetKey
                 );
             }
             if (this.check) {
+                buildTestMetadata();
                 session.getContext().reportAssetCheck(
-                    this.checkName, this.passed, this.checkMetadata, this.checkAssetKey
+                    this.checkName, this.passed, this.metadata, this.checkAssetKey
                 );
             }
         } catch (Exception exception) {
             pipesContext.reportException(exception);
+        }
+    }
+
+    private void buildTestMetadata() {
+        if (this.metadata == null) {
+            this.metadata = new HashMap<>();
+            this.metadata.put("float", new PipesMetadata(0.1, Type.FLOAT));
+            this.metadata.put("int", new PipesMetadata(1, Type.INT));
+            this.metadata.put("text", new PipesMetadata("hello", Type.TEXT));
+            this.metadata.put("notebook", new PipesMetadata("notebook.ipynb", Type.NOTEBOOK));
+            this.metadata.put("path", new PipesMetadata("/dev/null", Type.PATH));
+            this.metadata.put("md", new PipesMetadata("**markdown**", Type.MD));
+            this.metadata.put("bool_true", new PipesMetadata(true, Type.BOOL));
+            this.metadata.put("bool_false", new PipesMetadata(false, Type.BOOL));
+            this.metadata.put("asset", new PipesMetadata(new String[]{"foo", "bar"}, Type.ASSET));
+            this.metadata.put(
+                "dagster_run",
+                new PipesMetadata("db892d7f-0031-4747-973d-22e8b9095d9d", Type.DAGSTER_RUN)
+            );
+            this.metadata.put("job", new PipesMetadata("my_other_job", Type.JOB));
+            this.metadata.put("null", new PipesMetadata(null, Type.NULL));
+            this.metadata.put("url", new PipesMetadata("https://dagster.io", Type.URL));
+            Map<String, Object> jsonMap = new HashMap<>();
+            jsonMap.put("foo", "bar");
+            jsonMap.put("baz", 1);
+            jsonMap.put("qux", new int[]{1, 2, 3});
+            Map<String, Integer> inner = new HashMap<>();
+            inner.put("a", 1);
+            inner.put("b", 2);
+            jsonMap.put("quux", inner);
+            jsonMap.put("corge", null);
+            this.metadata.put("json", new PipesMetadata(jsonMap, Type.JSON));
         }
     }
 }
