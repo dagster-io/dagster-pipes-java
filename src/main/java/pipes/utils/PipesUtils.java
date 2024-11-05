@@ -37,6 +37,6 @@ public final class PipesUtils {
     }
 
     public static PipesMessage makeMessage(Method method, Map<String, Object> params) {
-        return new PipesMessage(PipesConstants.PIPES_PROTOCOL_VERSION.name, method.toValue(), params);
+        return new PipesMessage(PipesConstants.PIPES_PROTOCOL_VERSION.toString(), method.toValue(), params);
     }
 }

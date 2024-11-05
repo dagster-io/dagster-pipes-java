@@ -28,7 +28,9 @@ public class PipesFileMessageWriterChannel implements PipesMessageWriterChannel 
             }
 
             try (FileWriter fileWriter = new FileWriter(file, true)) {
-                String jsonMessage = objectMapper.writeValueAsString(message);
+                System.out.println("msg to str: " + message.toString());
+                System.out.println(file.getAbsolutePath());
+                String jsonMessage = objectMapper.writeValueAsString(message.toString());
                 fileWriter.write(jsonMessage + System.lineSeparator());
             }
         } catch (IOException e) {
