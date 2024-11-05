@@ -16,6 +16,7 @@ from dagster._core.pipes.utils import (
     PipesTempFileContextInjector,
     PipesFileMessageReader,
 )
+from dagster_pipes import _normalize_param_metadata
 from dagster._core.pipes.client import PipesContextInjector
 import json
 from hypothesis_jsonschema import from_schema
@@ -258,7 +259,9 @@ def test_java_pipes_report_asset_materialization(
     asset_materialization_dict = {}
 
     if metadata is not None:
-        asset_materialization_dict["metadata"] = metadata
+        asset_materialization_dict["metadata"] = _normalize_param_metadata(
+            metadata, "report_asset_materialization", "metadata"
+        )
 
     if data_version is not None:
         asset_materialization_dict["dataVersion"] = data_version
@@ -272,6 +275,8 @@ def test_java_pipes_report_asset_materialization(
 
     with open(str(asset_materialization_path), "w") as f:
         json.dump(asset_materialization_dict, f)
+
+    breakpoint()
 
     @asset
     def java_asset(
