@@ -276,8 +276,6 @@ def test_java_pipes_report_asset_materialization(
     with open(str(asset_materialization_path), "w") as f:
         json.dump(asset_materialization_dict, f)
 
-    breakpoint()
-
     @asset
     def java_asset(
         context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
