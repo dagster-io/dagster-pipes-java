@@ -28,7 +28,7 @@ public class PipesTests {
     private String jobName;
     private Object payload;
 
-    private Map<String, PipesMetadata> metadata;
+    private Map<String, PipesMetadata> metadata = null;
 
     //Related to reportAssetMaterialization
     private boolean materialization = false;
@@ -133,7 +133,7 @@ public class PipesTests {
     }
 
     @Test
-    public void fullTest() throws DagsterPipesException, IOException {
+    public void fullTest() throws Exception {
         PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
         PipesContextLoader contextLoader = new PipesDefaultContextLoader();
         PipesMessageWriter messageWriter = new PipesDefaultMessageWriter();
@@ -145,8 +145,11 @@ public class PipesTests {
                 session.getContext().reportCustomMessage(this.payload);
                 System.out.println("Payload reported with custom message.");
             }
+
+            System.out.println("before this mat " + this.materialization + this.metadata);
             if (this.materialization) {
-                buildTestMetadata();
+                this.buildTestMetadata();
+                System.out.println("reportingAssetMat...");
                 session.getContext().reportAssetMaterialization(
                     this.metadata, this.dataVersion, this.materializationAssetKey
                 );
@@ -163,7 +166,7 @@ public class PipesTests {
     }
 
     private void buildTestMetadata() {
-        if (this.metadata == null) {
+    if (this.metadata == null) {
             this.metadata = new HashMap<>();
             this.metadata.put("float", new PipesMetadata(0.1, Type.FLOAT));
             this.metadata.put("int", new PipesMetadata(1, Type.INT));
@@ -175,8 +178,8 @@ public class PipesTests {
             this.metadata.put("bool_false", new PipesMetadata(false, Type.BOOL));
             this.metadata.put("asset", new PipesMetadata(new String[]{"foo", "bar"}, Type.ASSET));
             this.metadata.put(
-                "dagster_run",
-                new PipesMetadata("db892d7f-0031-4747-973d-22e8b9095d9d", Type.DAGSTER_RUN)
+                    "dagster_run",
+                    new PipesMetadata("db892d7f-0031-4747-973d-22e8b9095d9d", Type.DAGSTER_RUN)
             );
             this.metadata.put("job", new PipesMetadata("my_other_job", Type.JOB));
             this.metadata.put("null", new PipesMetadata(null, Type.NULL));
@@ -191,6 +194,7 @@ public class PipesTests {
             jsonMap.put("quux", inner);
             jsonMap.put("corge", null);
             this.metadata.put("json", new PipesMetadata(jsonMap, Type.JSON));
+            System.out.println("abcdef");
         }
     }
 }

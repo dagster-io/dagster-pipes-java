@@ -48,7 +48,7 @@ public class PipesMessage {
     public String toString() {
         return String.format(
             "PipesMessage{%s='%s\\, method=%s\\, params=%s\\}",
-            PIPES_PROTOCOL_VERSION_FIELD.name, dagsterPipesVersion, method, params
+            PIPES_PROTOCOL_VERSION_FIELD, dagsterPipesVersion, method, params
         );
     }
 }

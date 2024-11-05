@@ -12,7 +12,7 @@ public class PipesMetadata {
     private Type type;
 
     public static final List<Class<?>> ALLOWED_VALUE_TYPES = Arrays.asList(
-        Long.class, Double.class, Map.class,
+        Integer.class, Long.class, Double.class, Map.class,
         String[].class, Boolean.class, String.class
     );
 
