@@ -254,6 +254,9 @@ def test_java_pipes_report_asset_materialization(
 
     messages_file = work_dir / "messages"
 
+    with open(str(messages_file), "w"):
+        pass
+
     asset_materialization_dict = {}
 
     if data_version is not None:
