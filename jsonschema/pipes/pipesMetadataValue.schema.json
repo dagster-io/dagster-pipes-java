@@ -16,7 +16,9 @@
                 "bool",
                 "dagster_run",
                 "asset",
-                "null"
+                "null",
+                "job",
+                "timestamp"
             ]
         },
         "raw_value": {
