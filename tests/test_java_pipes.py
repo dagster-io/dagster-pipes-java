@@ -6,7 +6,7 @@ from dagster import (
     materialize,
 )
 from typing import Dict, Any, Optional, List
-
+import sys
 from pathlib import Path
 import subprocess
 import pytest
@@ -291,7 +291,10 @@ def test_java_pipes_report_asset_materialization(
 
         materialization = invocation_result.get_materialize_result()
 
-        #assert materialization.data_version == data_version
+        print(pipes_subprocess_client.message_reader._path)
+        breakpoint()
+
+        assert materialization.data_version == data_version
 
         #assert materialization.metadata is not None
 
