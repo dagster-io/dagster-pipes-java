@@ -44,11 +44,11 @@ public class PipesMessage {
         return this.params != null;
     }
 
-    @Override
-    public String toString() {
-        return String.format(
-            "PipesMessage{%s='%s\\, method=%s\\, params=%s\\}",
-            PIPES_PROTOCOL_VERSION_FIELD, dagsterPipesVersion, method, params
-        );
-    }
+//    @Override
+//    public String toString() {
+//        return String.format(
+//            "PipesMessage{%s='%s\\, method=%s\\, params=%s\\}",
+//            PIPES_PROTOCOL_VERSION_FIELD, dagsterPipesVersion, method, params
+//        );
+//    }
 }
