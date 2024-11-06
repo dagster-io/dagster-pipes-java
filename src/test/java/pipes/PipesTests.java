@@ -9,7 +9,6 @@ import pipes.loaders.PipesDefaultContextLoader;
 import pipes.loaders.PipesEnvVarParamsLoader;
 import pipes.loaders.PipesParamsLoader;
 import pipes.writers.*;
-import types.PipesMetadataValue;
 import types.Type;
 
 import java.io.IOException;
@@ -21,7 +20,6 @@ public class PipesTests {
 
     private Map<String, String> input;
     private PipesContextData contextData;
-    private PipesMessageWriterChannel writer;
     private Map<String, Object> extras;
     private String jobName;
     private Object payload;
@@ -30,8 +28,6 @@ public class PipesTests {
 
     //Related to reportAssetMaterialization
     private boolean materialization = false;
-    // TODO:: remove?
-    //  private Map<String, PipesMetadataValue> materializationMetadata;
     private String dataVersion;
     private String materializationAssetKey;
 
@@ -39,8 +35,6 @@ public class PipesTests {
     private boolean check = false;
     private String checkName;
     private boolean passed;
-    // TODO:: remove?
-    //  private Map<String, PipesMetadataValue> checkMetadata;
     private String checkAssetKey;
 
     void setInput(Map<String, String> input) {
@@ -55,18 +49,6 @@ public class PipesTests {
         this.jobName = jobName;
     }
 
-    void setWriter(PipesMessageWriterChannel writer) {
-        this.writer = writer;
-    }
-
-    void setWriter() throws DagsterPipesException {
-        this.writer = WriterChannelLoader.getWriter(input);
-    }
-
-    void setContextData(PipesContextData contextData) {
-        this.contextData = contextData;
-    }
-
     void setContextData() throws DagsterPipesException {
         this.contextData = DataLoader.getData(input);
     }
@@ -75,22 +57,16 @@ public class PipesTests {
         this.payload = payload;
     }
 
-    void setMaterialization(
-        Map<String, PipesMetadataValue> metadata, String dataVersion, String assetKey
-    ) {
+    void setMaterialization(String dataVersion, String assetKey) {
         this.materialization = true;
-        //this.materializationMetadata = metadata;
         this.dataVersion = dataVersion;
         this.materializationAssetKey = assetKey;
     }
 
-    void setCheck(
-        String checkName, boolean passed, Map<String, PipesMetadataValue> metadata, String assetKey
-    ) {
+    void setCheck(String checkName, boolean passed, String assetKey) {
         this.check = true;
         this.checkName = checkName;
         this.passed = passed;
-        //this.checkMetadata = metadata;
         this.checkAssetKey = assetKey;
     }
 

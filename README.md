@@ -14,8 +14,9 @@ This will automatically create a virtual environment in `.venv` and install all 
 
 To use the environment, either activate it manually with `source ./.venv/bin/activate`, or use `uv run` to execute commands in the context of this environment.
 
-2. Install Java stuff
+2. Install Java 8. 
 
+To build project, use:
 ```shell
 ./gradlew build
 ```
