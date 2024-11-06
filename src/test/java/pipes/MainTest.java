@@ -4,17 +4,19 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import picocli.CommandLine;
 import pipes.data.PipesConstants;
+import types.PipesMetadataValue;
 
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 @CommandLine.Command(name = "main-test", mixinStandardHelpOptions = true)
 public class MainTest implements Runnable {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
+    private Map<String, Object> cachedJson = new ConcurrentHashMap<>();
 
     @CommandLine.Option(
         names = {"--context"},
@@ -59,6 +61,18 @@ public class MainTest implements Runnable {
     )
     private String customPayloadPath;
 
+    @CommandLine.Option(
+        names = {"--report-asset-check"},
+        description = "Specify path to JSON with parameters to test reportAssetCheck"
+    )
+    private String reportAssetCheckJson;
+
+    @CommandLine.Option(
+        names = {"--report-asset-materialization"},
+        description = "Specify path to JSON with parameters to test reportAssetMaterialization"
+    )
+    private String reportAssetMaterializationJson;
+
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
@@ -73,8 +87,26 @@ public class MainTest implements Runnable {
             pipesTests.setInput(input);
 
             if (this.customPayloadPath != null && !this.customPayloadPath.isEmpty()) {
-                Object payload = loadPayload(this.customPayloadPath);
+                cacheJson(this.customPayloadPath);
+                Object payload = loadParamByWrapperKey("payload", Object.class);
                 pipesTests.setPayload(payload);
+            }
+
+            if (this.reportAssetMaterializationJson != null && !this.reportAssetMaterializationJson.isEmpty()) {
+                cacheJson(this.reportAssetMaterializationJson);
+                Map<String, PipesMetadataValue> metadata = loadParamByWrapperKey("metadata", Map.class);
+                String dataVersion = loadParamByWrapperKey("dataVersion", String.class);
+                String assetKey = loadParamByWrapperKey("assetKey", String.class);
+                pipesTests.setMaterialization(metadata, dataVersion, assetKey);
+            }
+
+            if (this.reportAssetCheckJson != null && !this.reportAssetCheckJson.isEmpty()) {
+                cacheJson(this.reportAssetCheckJson);
+                String checkName = loadParamByWrapperKey("checkName", String.class);
+                boolean passed = loadParamByWrapperKey("passed", Boolean.class);
+                Map<String, PipesMetadataValue> metadata = loadParamByWrapperKey("metadata", Map.class);
+                String assetKey = loadParamByWrapperKey("assetKey", String.class);
+                pipesTests.setCheck(checkName, passed, metadata, assetKey);
             }
 
             if (this.full) {
@@ -99,22 +131,33 @@ public class MainTest implements Runnable {
                 pipesTests.setJobName(this.jobName);
                 pipesTests.testJobName();
             }
-
-            //TODO:: delete or modify the test
-            //pipesTests.testMessageWriter();
-        } catch (DagsterPipesException | IOException exception) {
+        } catch (IOException | DagsterPipesException exception) {
             throw new RuntimeException(exception);
         }
 
         System.out.println("All tests finished.");
     }
 
-    private Object loadPayload(String jsonFilePath) {
-        File jsonFile = new File(jsonFilePath);
+    private void cacheJson(String jsonFilePath) {
         try {
-            return this.objectMapper.readValue(jsonFile, Map.class).get("payload");
+            File jsonFile = new File(jsonFilePath);
+            this.cachedJson = this.objectMapper.readValue(jsonFile, Map.class);
         } catch (IOException e) {
             throw new RuntimeException("Failed to load JSON from file: " + jsonFilePath, e);
+        }
+    }
+
+    private <T> T loadParamByWrapperKey(String wrapperKey, Class<T> type) {
+        Object object = this.cachedJson.get(wrapperKey);
+        if (object != null && !type.isInstance(object)) {
+            throw new IllegalArgumentException(
+                String.format(
+                    "Wrong type for %s parameter. Expected: %s, found: %s",
+                    wrapperKey, type.getTypeName(), object.getClass().getTypeName()
+                )
+            );
+        } else {
+            return (T) object;
         }
     }
 

@@ -6,13 +6,13 @@
 //
 // Import this package:
 //
-//     import io.quicktype.Converter;
+//     import types.Converter;
 //
 // Then you can deserialize a JSON string with
 //
-//     Metadata data = Converter.fromJsonString(jsonString);
+//     PipesMetadataValue data = Converter.fromJsonString(jsonString);
 
-package io.quicktype;
+package types;
 
 import java.io.IOException;
 import com.fasterxml.jackson.databind.*;
@@ -60,11 +60,11 @@ public class Converter {
     }
     // Serialize/deserialize helpers
 
-    public static Metadata fromJsonString(String json) throws IOException {
+    public static PipesMetadataValue fromJsonString(String json) throws IOException {
         return getObjectReader().readValue(json);
     }
 
-    public static String toJsonString(Metadata obj) throws JsonProcessingException {
+    public static String toJsonString(PipesMetadataValue obj) throws JsonProcessingException {
         return getObjectWriter().writeValueAsString(obj);
     }
 
@@ -85,8 +85,8 @@ public class Converter {
             }
         });
         mapper.registerModule(module);
-        reader = mapper.readerFor(Metadata.class);
-        writer = mapper.writerFor(Metadata.class);
+        reader = mapper.readerFor(PipesMetadataValue.class);
+        writer = mapper.writerFor(PipesMetadataValue.class);
     }
 
     private static ObjectReader getObjectReader() {

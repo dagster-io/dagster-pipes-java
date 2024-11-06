@@ -1,9 +1,9 @@
 package pipes.utils;
 
-import pipes.data.Method;
 import pipes.DagsterPipesException;
 import pipes.data.PipesConstants;
 import pipes.writers.PipesMessage;
+import types.Method;
 
 import java.util.Map;
 
@@ -37,6 +37,6 @@ public final class PipesUtils {
     }
 
     public static PipesMessage makeMessage(Method method, Map<String, Object> params) {
-        return new PipesMessage(PipesConstants.PIPES_PROTOCOL_VERSION.name, method.toValue(), params);
+        return new PipesMessage(PipesConstants.PIPES_PROTOCOL_VERSION.toString(), method.toValue(), params);
     }
 }

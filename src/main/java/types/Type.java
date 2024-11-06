@@ -1,10 +1,10 @@
-package io.quicktype;
+package types;
 
 import java.io.IOException;
 import com.fasterxml.jackson.annotation.*;
 
 public enum Type {
-    ASSET, BOOL, DAGSTER_RUN, FLOAT, INFER, INT, JSON, MD, NOTEBOOK, NULL, PATH, TEXT, URL;
+    ASSET, BOOL, DAGSTER_RUN, FLOAT, INFER, INT, JOB, JSON, MD, NOTEBOOK, NULL, PATH, TEXT, TIMESTAMP, URL;
 
     @JsonValue
     public String toValue() {
@@ -15,12 +15,14 @@ public enum Type {
             case FLOAT: return "float";
             case INFER: return "__infer__";
             case INT: return "int";
+            case JOB: return "job";
             case JSON: return "json";
             case MD: return "md";
             case NOTEBOOK: return "notebook";
             case NULL: return "null";
             case PATH: return "path";
             case TEXT: return "text";
+            case TIMESTAMP: return "timestamp";
             case URL: return "url";
         }
         return null;
@@ -34,12 +36,14 @@ public enum Type {
         if (value.equals("float")) return FLOAT;
         if (value.equals("__infer__")) return INFER;
         if (value.equals("int")) return INT;
+        if (value.equals("job")) return JOB;
         if (value.equals("json")) return JSON;
         if (value.equals("md")) return MD;
         if (value.equals("notebook")) return NOTEBOOK;
         if (value.equals("null")) return NULL;
         if (value.equals("path")) return PATH;
         if (value.equals("text")) return TEXT;
+        if (value.equals("timestamp")) return TIMESTAMP;
         if (value.equals("url")) return URL;
         throw new IOException("Cannot deserialize Type");
     }

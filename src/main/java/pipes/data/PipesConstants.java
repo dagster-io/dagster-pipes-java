@@ -18,4 +18,9 @@ public enum PipesConstants {
     PipesConstants(final String name) {
         this.name = name;
     }
+
+    @Override
+    public String toString() {
+        return name;
+    }
 }
