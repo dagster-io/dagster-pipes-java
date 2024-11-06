@@ -1,14 +1,19 @@
 package pipes;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import types.Type;
 
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@JsonPropertyOrder({"raw_value", "type"})
 public class PipesMetadata {
 
-    private Object value;
+    @JsonProperty("raw_value")
+    private Object rawValue;
+    @JsonProperty("type")
     private Type type;
 
     public static final List<Class<?>> ALLOWED_VALUE_TYPES = Arrays.asList(
@@ -27,12 +32,12 @@ public class PipesMetadata {
                 "Wrong metadata value map type. Only String keys allowed: %s", value.getClass().getTypeName()
             ));
         }
-        this.value = value;
+        this.rawValue = value;
         this.type = type;
     }
 
-    public Object getValue() {
-        return value;
+    public Object getRawValue() {
+        return rawValue;
     }
 
     public Type getType() {
@@ -41,7 +46,7 @@ public class PipesMetadata {
 
     @Override
     public String toString() {
-        String first = value != null ? value.getClass().toString() : "null";
+        String first = rawValue != null ? rawValue.getClass().toString() : "null";
         String sec =   type != null ? type.toValue() : null;
         return first + sec;
     }

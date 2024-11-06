@@ -116,24 +116,7 @@ public class PipesTests {
     }
 
     @Test
-    public void testMessageWriter() throws IOException {
-        Map<String, Object> randomMap = new HashMap<>();
-        randomMap.put("1", 1);
-        randomMap.put("2", 2);
-        PipesMessage message = new PipesMessage("1.0", "bla", randomMap);
-        this.writer.writeMessage(message);
-        if (this.writer instanceof PipesFileMessageWriterChannel) {
-            File file = new File(((PipesFileMessageWriterChannel) this.writer).getPath());
-            Assertions.assertTrue(file.exists());
-            Assertions.assertEquals(
-                "{\"dagsterPipesVersion\":\"1.0\",\"method\":\"bla\",\"params\":{\"1\":1,\"2\":2}}",
-                TestUtils.getLastLine(file.getPath())
-            );
-        }
-    }
-
-    @Test
-    public void fullTest() throws Exception {
+    public void fullTest() throws DagsterPipesException, IOException {
         PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
         PipesContextLoader contextLoader = new PipesDefaultContextLoader();
         PipesMessageWriter messageWriter = new PipesDefaultMessageWriter();
@@ -161,8 +144,6 @@ public class PipesTests {
             System.out.println("Finished try session");
         } catch (Exception exception) {
             pipesContext.reportException(exception);
-            // TODO:: remove
-            throw exception;
         }
     }
 

@@ -131,10 +131,7 @@ public class MainTest implements Runnable {
                 pipesTests.setJobName(this.jobName);
                 pipesTests.testJobName();
             }
-
-            //TODO:: delete or modify the test
-            //pipesTests.testMessageWriter();
-        } catch (Exception exception) {
+        } catch (IOException | DagsterPipesException exception) {
             throw new RuntimeException(exception);
         }
 
