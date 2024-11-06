@@ -14,7 +14,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class PipesFileMessageWriterChannelTest {
+class PipesMessageWriterChannelTest {
 
     @TempDir
     static Path tempDir;
@@ -43,7 +43,7 @@ class PipesFileMessageWriterChannelTest {
     }
 
     @Test
-    void testPipesStreamMessageWriterChannel() throws IOException {
+    void testPipesStreamMessageWriterChannel() {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         PipesStreamMessageWriterChannel channel = new PipesStreamMessageWriterChannel(outputStream);
         channel.writeMessage(message);
