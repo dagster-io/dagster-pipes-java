@@ -134,7 +134,7 @@ public class MainTest implements Runnable {
 
             //TODO:: delete or modify the test
             //pipesTests.testMessageWriter();
-        } catch (DagsterPipesException | IOException exception) {
+        } catch (Exception exception) {
             throw new RuntimeException(exception);
         }
 

@@ -30,4 +30,19 @@ public class PipesMetadata {
         this.value = value;
         this.type = type;
     }
+
+    public Object getValue() {
+        return value;
+    }
+
+    public Type getType() {
+        return type;
+    }
+
+    @Override
+    public String toString() {
+        String first = value != null ? value.getClass().toString() : "null";
+        String sec =   type != null ? type.toValue() : null;
+        return first + sec;
+    }
 }

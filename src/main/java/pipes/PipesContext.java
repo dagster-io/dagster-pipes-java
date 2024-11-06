@@ -54,7 +54,7 @@ public class PipesContext {
             }
             this.messageChannel.writeMessage(PipesUtils.makeMessage(Method.CLOSED, payload));
             this.closed = true;
-            if (this.exception !=  null) {
+            if (this.exception != null) {
                 throw this.exception;
             }
         }

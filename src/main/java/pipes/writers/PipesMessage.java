@@ -1,16 +1,19 @@
 package pipes.writers;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+
 import java.util.Map;
 
-import static pipes.data.PipesConstants.PIPES_PROTOCOL_VERSION_FIELD;
-
+@JsonPropertyOrder({"__dagster_pipes_version", "method", "params"})
 public class PipesMessage {
 
+    @JsonProperty("__dagster_pipes_version")
     private String dagsterPipesVersion;
     private String method;
-    private Map<String, Object> params;
+    private Map<String, ?> params;
 
-    public PipesMessage(String dagsterPipesVersion, String method, Map<String, Object> params) {
+    public PipesMessage(String dagsterPipesVersion, String method, Map<String, ?> params) {
         this.dagsterPipesVersion = dagsterPipesVersion;
         this.method = method;
         this.params = params;
@@ -32,7 +35,7 @@ public class PipesMessage {
         this.method = method;
     }
 
-    public Map<String, Object> getParams() {
+    public Map<String, ?> getParams() {
         return params;
     }
 
@@ -43,12 +46,4 @@ public class PipesMessage {
     public boolean hasParams() {
         return this.params != null;
     }
-
-//    @Override
-//    public String toString() {
-//        return String.format(
-//            "PipesMessage{%s='%s\\, method=%s\\, params=%s\\}",
-//            PIPES_PROTOCOL_VERSION_FIELD, dagsterPipesVersion, method, params
-//        );
-//    }
 }

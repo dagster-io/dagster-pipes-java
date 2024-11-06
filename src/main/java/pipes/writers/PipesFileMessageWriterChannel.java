@@ -1,6 +1,8 @@
 package pipes.writers;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -14,6 +16,7 @@ public class PipesFileMessageWriterChannel implements PipesMessageWriterChannel 
     public PipesFileMessageWriterChannel(String path) {
         this.path = path;
         this.objectMapper = new ObjectMapper();
+        this.objectMapper.configure(SerializationFeature.FAIL_ON_EMPTY_BEANS, false);
     }
 
     @Override
@@ -28,9 +31,9 @@ public class PipesFileMessageWriterChannel implements PipesMessageWriterChannel 
             }
 
             try (FileWriter fileWriter = new FileWriter(file, true)) {
-                System.out.println("msg to str: " + message.toString());
                 System.out.println(file.getAbsolutePath());
                 String jsonMessage = objectMapper.writeValueAsString(message);
+                System.out.println(jsonMessage);
                 fileWriter.write(jsonMessage + System.lineSeparator());
             }
         } catch (IOException e) {
