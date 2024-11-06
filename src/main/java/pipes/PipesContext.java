@@ -186,6 +186,10 @@ public class PipesContext {
         return this.data.getExtras();
     }
 
+    public Logger getLogger() {
+        return this.logger;
+    }
+
     private static void assertSingleAsset(Collection<?> collection, String name) throws DagsterPipesException {
         if (collection.size() != 1) {
             throw new DagsterPipesException(
@@ -226,10 +230,6 @@ public class PipesContext {
                 "Asset keys: " + assetKey + " has already been materialized, cannot report additional data."
             );
         }
-        // TODO:: Remove if metadata is reported as expected
-//        if (pipesMetadataValue != null) {
-//            pipesMetadataValue = normalizePipesMetadataValue(pipesMetadataValue);
-//        }
         System.out.println("writing message...");
         this.writeMessage(
             Method.REPORT_ASSET_MATERIALIZATION,
@@ -258,20 +258,10 @@ public class PipesContext {
     ) throws DagsterPipesException, IOException {
         assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
         assetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
-        // TODO:: Remove if metadata is reported as expected
-//        if (pipesMetadata != null) {
-//            pipesMetadata = normalizePipesMetadataValue(pipesMetadata);
-//        }
         this.writeMessage(
             Method.REPORT_ASSET_CHECK,
             this.createMap(assetKey, checkName, passed, severity, pipesMetadata)
         );
-    }
-
-    private static Map<String, PipesMetadataValue> normalizePipesMetadataValue(Map<String, PipesMetadataValue> PipesMetadataValue) {
-        Map<String, PipesMetadataValue> newPipesMetadataValue = new HashMap<>();
-        // TODO:: add logic here
-        return newPipesMetadataValue;
     }
 
     private void assertNotNull(Object value, Method method, String param) throws DagsterPipesException {
