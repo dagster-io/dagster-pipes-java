@@ -5,6 +5,8 @@ from dagster import (
     asset,
     materialize,
     DataVersion,
+    MetadataValue,
+    AssetKey,
 )
 from typing import Dict, Any, Optional, List, cast
 from pathlib import Path
@@ -241,6 +243,42 @@ def test_java_pipes_custom_message(
     )
 
 
+def assert_known_metadata(materialization: MaterializeResult):
+    # {'bool_true': BoolMetadataValue(value=True), 'float': FloatMetadataValue(value=0.1), 'int': IntMetadataValue(value=1), 'url': UrlMetadataValue(url='https://dagster.io'), 'path': PathMetadataValue(path='/dev/null'), 'null': NullMetadataValue(), 'md': MarkdownMetadataValue(md_str='**markdown**'), 'json': JsonMetadataValue(data={'quux': {'a': 1, 'b': 2}, 'corge': None, 'qux': [1, 2, 3], 'foo': 'bar', 'baz': 1}), 'bool_false': BoolMetadataValue(value=False), 'text': TextMetadataValue(text='hello'), 'asset': DagsterAssetMetadataValue(asset_key=AssetKey(['foo', 'bar'])), 'dagster_run': DagsterRunMetadataValue(run_id='db892d7f-0031-4747-973d-22e8b9095d9d'), 'notebook': NotebookMetadataValue(path='notebook.ipynb')}
+
+    assert materialization.metadata is not None
+
+    assert materialization.metadata.get("bool_true") == MetadataValue.bool(True)
+    assert materialization.metadata.get("bool_false") == MetadataValue.bool(False)
+    assert materialization.metadata.get("float") == MetadataValue.float(0.1)
+    assert materialization.metadata.get("int") == MetadataValue.int(1)
+    assert materialization.metadata.get("url") == MetadataValue.url(
+        "https://dagster.io"
+    )
+    assert materialization.metadata.get("path") == MetadataValue.path("/dev/null")
+    assert materialization.metadata.get("null") == MetadataValue.null()
+    assert materialization.metadata.get("md") == MetadataValue.md("**markdown**")
+    assert materialization.metadata.get("json") == MetadataValue.json(
+        {
+            "quux": {"a": 1, "b": 2},
+            "corge": None,
+            "qux": [1, 2, 3],
+            "foo": "bar",
+            "baz": 1,
+        }
+    )
+    assert materialization.metadata.get("text") == MetadataValue.text("hello")
+    assert materialization.metadata.get("asset") == MetadataValue.asset(
+        AssetKey(["foo", "bar"])
+    )
+    assert materialization.metadata.get("dagster_run") == MetadataValue.dagster_run(
+        "db892d7f-0031-4747-973d-22e8b9095d9d"
+    )
+    assert materialization.metadata.get("notebook") == MetadataValue.notebook(
+        "notebook.ipynb"
+    )
+
+
 @parametrize("data_version", [None, "alpha"])
 @parametrize("asset_key", [None, ["java_asset"]])
 def test_java_pipes_report_asset_materialization(
@@ -297,6 +335,9 @@ def test_java_pipes_report_asset_materialization(
             assert cast(DataVersion, materialization.data_version).value == data_version
         else:
             assert materialization.data_version is None
+
+        if materialization.metadata is not None:
+            assert_known_metadata(materialization)
 
         # assert materialization.metadata is not None
 
