@@ -4,9 +4,9 @@ from dagster import (
     PipesSubprocessClient,
     asset,
     materialize,
+    DataVersion,
 )
-from typing import Dict, Any, Optional, List
-import sys
+from typing import Dict, Any, Optional, List, cast
 from pathlib import Path
 import subprocess
 import pytest
@@ -16,7 +16,6 @@ from dagster._core.pipes.utils import (
     PipesTempFileContextInjector,
     PipesFileMessageReader,
 )
-from dagster_pipes import _normalize_param_metadata
 from dagster._core.pipes.client import PipesContextInjector
 import json
 from hypothesis_jsonschema import from_schema
@@ -294,12 +293,12 @@ def test_java_pipes_report_asset_materialization(
 
         materialization = invocation_result.get_materialize_result()
 
-        print(pipes_subprocess_client.message_reader._path)
-        breakpoint()
+        if data_version is not None:
+            assert cast(DataVersion, materialization.data_version).value == data_version
+        else:
+            assert materialization.data_version is None
 
-        assert materialization.data_version == data_version
-
-        #assert materialization.metadata is not None
+        # assert materialization.metadata is not None
 
         return materialization
 

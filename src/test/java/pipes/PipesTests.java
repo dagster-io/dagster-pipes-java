@@ -161,7 +161,6 @@ public class PipesTests {
                 "dagster_run",
                 new PipesMetadata("db892d7f-0031-4747-973d-22e8b9095d9d", Type.DAGSTER_RUN)
             );
-            this.metadata.put("job", new PipesMetadata("my_other_job", Type.JOB));
             this.metadata.put("null", new PipesMetadata(null, Type.NULL));
             this.metadata.put("url", new PipesMetadata("https://dagster.io", Type.URL));
             Map<String, Object> jsonMap = new HashMap<>();
