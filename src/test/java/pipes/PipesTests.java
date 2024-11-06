@@ -10,10 +10,8 @@ import pipes.loaders.PipesEnvVarParamsLoader;
 import pipes.loaders.PipesParamsLoader;
 import pipes.writers.*;
 import types.PipesMetadataValue;
-import types.RawValue;
 import types.Type;
 
-import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
@@ -99,8 +97,8 @@ public class PipesTests {
     @Test
     public void testExtras() {
         Assertions.assertTrue(
-                contextData.getExtras().entrySet().containsAll(this.extras.entrySet()),
-                "Extras does not contain all provided entries."
+            contextData.getExtras().entrySet().containsAll(this.extras.entrySet()),
+            "Extras does not contain all provided entries."
         );
         System.out.println("Extras are correct.");
     }
@@ -108,9 +106,9 @@ public class PipesTests {
     @Test
     public void testJobName() {
         Assertions.assertEquals(
-                this.jobName,
-                contextData.getJobName(),
-                "JobName is incorrect."
+            this.jobName,
+            contextData.getJobName(),
+            "JobName is incorrect."
         );
         System.out.println("JobName is correct.");
     }
@@ -158,7 +156,7 @@ public class PipesTests {
             this.metadata.put("md", new PipesMetadata("**markdown**", Type.MD));
             this.metadata.put("bool_true", new PipesMetadata(true, Type.BOOL));
             this.metadata.put("bool_false", new PipesMetadata(false, Type.BOOL));
-            this.metadata.put("asset", new PipesMetadata(new String[]{"foo", "bar"}, Type.ASSET));
+            this.metadata.put("asset", new PipesMetadata("foo/bar", Type.ASSET));
             this.metadata.put(
                 "dagster_run",
                 new PipesMetadata("db892d7f-0031-4747-973d-22e8b9095d9d", Type.DAGSTER_RUN)

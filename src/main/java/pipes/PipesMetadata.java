@@ -17,8 +17,7 @@ public class PipesMetadata {
     private Type type;
 
     public static final List<Class<?>> ALLOWED_VALUE_TYPES = Arrays.asList(
-        Integer.class, Long.class, Double.class, Map.class,
-        String[].class, Boolean.class, String.class
+        Integer.class, Long.class, Double.class, Map.class, Boolean.class, String.class
     );
 
     public PipesMetadata(Object value, Type type) {
@@ -42,12 +41,5 @@ public class PipesMetadata {
 
     public Type getType() {
         return type;
-    }
-
-    @Override
-    public String toString() {
-        String first = rawValue != null ? rawValue.getClass().toString() : "null";
-        String sec =   type != null ? type.toValue() : null;
-        return first + sec;
     }
 }
