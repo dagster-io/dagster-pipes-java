@@ -1,9 +1,9 @@
 package pipes.writers;
 
-import java.io.IOException;
+import pipes.DagsterPipesException;
 
 public interface PipesMessageWriterChannel {
 
-    void writeMessage(PipesMessage message) throws IOException;
+    void writeMessage(PipesMessage message) throws DagsterPipesException;
 
 }

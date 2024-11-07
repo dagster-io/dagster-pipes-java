@@ -6,27 +6,45 @@ import pipes.loaders.PipesEnvVarParamsLoader;
 import pipes.loaders.PipesParamsLoader;
 import pipes.writers.PipesDefaultMessageWriter;
 import pipes.writers.PipesMessageWriter;
+import pipes.writers.PipesMessageWriterChannel;
 
-import java.io.IOException;
 import java.util.logging.Logger;
 
 import static org.mockito.Mockito.mock;
 
-public class PipesSession implements AutoCloseable {
+public class PipesSession {
 
     private final PipesContext context;
-
     private static final Logger logger = Logger.getLogger(PipesSession.class.getName());
 
-    PipesSession(PipesContext context) {
-        this.context = context;
-    }
-
-    public PipesContext openDagsterPipes(
+    public PipesSession(
         PipesParamsLoader paramsLoader,
         PipesContextLoader contextLoader,
-        PipesMessageWriter messageWriter
-    ) throws DagsterPipesException, IOException {
+        PipesMessageWriter<PipesMessageWriterChannel> messageWriter
+    ) throws DagsterPipesException {
+        this.context = buildContext(paramsLoader, contextLoader, messageWriter);
+    }
+
+    public void runPipesSession(ThrowingConsumer runnable) throws DagsterPipesException {
+        try {
+            runnable.run(this);
+        } catch (Exception exception) {
+            System.out.println("pipesExc! " + exception.getMessage());
+            this.context.reportException(exception);
+        } finally {
+            this.context.close();
+        }
+    }
+
+    public PipesContext getContext() {
+        return context;
+    }
+
+    private PipesContext buildContext(
+        PipesParamsLoader paramsLoader,
+        PipesContextLoader contextLoader,
+        PipesMessageWriter<PipesMessageWriterChannel> messageWriter
+    ) throws DagsterPipesException {
         if (PipesContext.isInitialized()) {
             return PipesContext.get();
         }
@@ -61,14 +79,5 @@ public class PipesSession implements AutoCloseable {
             "`dagster-pipes` context or attempts to initialize " +
             "`dagster-pipes` abstractions are no-ops."
         );
-    }
-
-    public PipesContext getContext() {
-        return context;
-    }
-
-    @Override
-    public void close() throws Exception {
-        this.context.close();
     }
 }

@@ -8,7 +8,6 @@ import pipes.utils.PipesUtils;
 import pipes.writers.PipesMessageWriter;
 import pipes.writers.PipesMessageWriterChannel;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -25,8 +24,8 @@ public class PipesContext {
     public PipesContext(
         PipesParamsLoader paramsLoader,
         PipesContextLoader contextLoader,
-        PipesMessageWriter messageWriter
-    ) throws DagsterPipesException, IOException {
+        PipesMessageWriter<PipesMessageWriterChannel> messageWriter
+    ) throws DagsterPipesException {
         Optional<Map<String, Object>> contextParams = paramsLoader.loadContextParams();
         Optional<Map<String, Object>> messageParams = paramsLoader.loadMessagesParams();
         if (contextParams.isPresent() && messageParams.isPresent()) {
@@ -46,7 +45,7 @@ public class PipesContext {
         this.exception = exception;
     }
 
-    public void close() throws Exception {
+    public void close() throws DagsterPipesException {
         if (!this.closed) {
             Map<String, Object> payload = new HashMap<>();
             if (this.exception != null) {
@@ -54,9 +53,6 @@ public class PipesContext {
             }
             this.messageChannel.writeMessage(PipesUtils.makeMessage(Method.CLOSED, payload));
             this.closed = true;
-            if (this.exception != null) {
-                throw this.exception;
-            }
         }
     }
 
@@ -77,7 +73,7 @@ public class PipesContext {
         return instance;
     }
 
-    public void reportCustomMessage(Object payload) throws DagsterPipesException, IOException {
+    public void reportCustomMessage(Object payload) throws DagsterPipesException {
         Map<String, Object> map = new HashMap<>();
         map.put("payload", payload);
         writeMessage(Method.REPORT_CUSTOM_MESSAGE, map);
@@ -86,7 +82,7 @@ public class PipesContext {
     private void writeMessage(
         Method method,
         Map<String, Object> params
-    ) throws DagsterPipesException, IOException {
+    ) throws DagsterPipesException {
         if (this.closed) {
             throw new DagsterPipesException("Cannot send message after pipes context is closed.");
         }
@@ -223,7 +219,7 @@ public class PipesContext {
         Map<String, PipesMetadata> pipesMetadata,
         String dataVersion,
         String assetKey
-    ) throws DagsterPipesException, IOException {
+    ) throws DagsterPipesException {
         assetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_MATERIALIZATION);
         if (this.materializedAssets.contains(assetKey)) {
             throw new IllegalStateException(
@@ -243,7 +239,7 @@ public class PipesContext {
         boolean passed,
         Map<String, PipesMetadata> pipesMetadata,
         String assetKey
-    ) throws DagsterPipesException, IOException {
+    ) throws DagsterPipesException {
         reportAssetCheck(
             checkName, passed, PipesAssetCheckSeverity.ERROR, pipesMetadata, assetKey
         );
@@ -255,7 +251,7 @@ public class PipesContext {
         PipesAssetCheckSeverity severity,
         Map<String, PipesMetadata> pipesMetadata,
         String assetKey
-    ) throws DagsterPipesException, IOException {
+    ) throws DagsterPipesException {
         assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
         assetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
         this.writeMessage(

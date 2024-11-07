@@ -103,6 +103,10 @@ public class MainTest implements Runnable {
                 String checkName = loadParamByWrapperKey("checkName", String.class);
                 boolean passed = loadParamByWrapperKey("passed", Boolean.class);
                 String assetKey = loadParamByWrapperKey("assetKey", String.class);
+                System.out.printf(
+                    "checkName: %s \npassed: %s \nassetKey: %s%n",
+                    checkName, passed, assetKey
+                );
                 pipesTests.setCheck(checkName, passed, assetKey);
             }
 

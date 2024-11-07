@@ -11,7 +11,6 @@ import pipes.loaders.PipesParamsLoader;
 import pipes.writers.*;
 import types.Type;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -90,35 +89,34 @@ public class PipesTests {
     }
 
     @Test
-    public void fullTest() throws DagsterPipesException, IOException {
+    public void fullTest() throws DagsterPipesException {
         PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
         PipesContextLoader contextLoader = new PipesDefaultContextLoader();
-        PipesMessageWriter messageWriter = new PipesDefaultMessageWriter();
-        PipesContext pipesContext = new PipesContext(paramsLoader, contextLoader, messageWriter);
-        try (PipesSession session = new PipesSession(pipesContext)) {
-            session.openDagsterPipes(paramsLoader, contextLoader, messageWriter);
-            System.out.println("Opened dagster pipes with set params.");
-            if (this.payload != null) {
-                session.getContext().reportCustomMessage(this.payload);
-                System.out.println("Payload reported with custom message.");
-            }
+        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
 
-            if (this.materialization) {
-                buildTestMetadata();
-                session.getContext().reportAssetMaterialization(
-                    this.metadata, this.dataVersion, this.materializationAssetKey
-                );
-            }
-            if (this.check) {
-                buildTestMetadata();
-                session.getContext().reportAssetCheck(
-                    this.checkName, this.passed, this.metadata, this.checkAssetKey
-                );
-            }
-            System.out.println("Finished try session");
-        } catch (Exception exception) {
-            pipesContext.reportException(exception);
+        PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
+        session.runPipesSession(this::fullTest);
+    }
+
+    private void fullTest(PipesSession session) throws DagsterPipesException {
+        if (this.payload != null) {
+            session.getContext().reportCustomMessage(this.payload);
+            System.out.println("Payload reported with custom message.");
         }
+
+        if (this.materialization) {
+            buildTestMetadata();
+            session.getContext().reportAssetMaterialization(
+                this.metadata, this.dataVersion, this.materializationAssetKey
+            );
+        }
+        if (this.check) {
+            buildTestMetadata();
+            session.getContext().reportAssetCheck(
+                this.checkName, this.passed, this.metadata, this.checkAssetKey
+            );
+        }
+        System.out.println("Finished try session");
     }
 
     public Map<String, PipesMetadata> buildTestMetadata() {
