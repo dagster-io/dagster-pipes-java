@@ -7,6 +7,7 @@ from dagster import (
     MetadataValue,
     AssetKey,
     DataVersion,
+    AssetCheckSpec,
 )
 from dagster_pipes import PipesAssetCheckSeverity
 from typing import Dict, Any, Optional, List, cast
@@ -377,6 +378,7 @@ def test_java_pipes_report_asset_check(
     report_asset_check_dict = {
         "passed": passed,
         "severity": severity,
+        "checkName": "my_check",
     }
 
     if asset_key is not None:
@@ -387,7 +389,9 @@ def test_java_pipes_report_asset_check(
     with open(str(report_asset_check_path), "w") as f:
         json.dump(report_asset_check_dict, f)
 
-    @asset
+    @asset(
+        check_specs=[AssetCheckSpec(name="my_check", asset=AssetKey(["java_asset"]))]
+    )
     def java_asset(
         context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
     ) -> MaterializeResult:
