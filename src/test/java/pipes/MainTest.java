@@ -72,6 +72,12 @@ public class MainTest implements Runnable {
     )
     private String reportAssetMaterializationJson;
 
+    @CommandLine.Option(
+        names = {"--throw-exception"},
+        description = "Throw exception in PipesSession with specified message"
+    )
+    private String throwExceptionMessage;
+
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
@@ -89,6 +95,11 @@ public class MainTest implements Runnable {
                 cacheJson(this.customPayloadPath);
                 Object payload = loadParamByWrapperKey("payload", Object.class);
                 pipesTests.setPayload(payload);
+            }
+
+            if (this.throwExceptionMessage != null) {
+                pipesTests.setMessage(this.throwExceptionMessage);
+                pipesTests.testRunPipesSessionWithException();
             }
 
             if (this.reportAssetMaterializationJson != null && !this.reportAssetMaterializationJson.isEmpty()) {

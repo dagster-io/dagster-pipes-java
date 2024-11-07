@@ -4,10 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pipes.data.PipesContextData;
-import pipes.loaders.PipesContextLoader;
-import pipes.loaders.PipesDefaultContextLoader;
-import pipes.loaders.PipesEnvVarParamsLoader;
-import pipes.loaders.PipesParamsLoader;
+import pipes.loaders.*;
 import pipes.writers.*;
 import types.Type;
 
@@ -22,6 +19,7 @@ public class PipesTests {
     private Map<String, Object> extras;
     private String jobName;
     private Object payload;
+    private String message;
 
     private Map<String, PipesMetadata> metadata = null;
 
@@ -67,6 +65,10 @@ public class PipesTests {
         this.checkName = checkName;
         this.passed = passed;
         this.checkAssetKey = assetKey;
+    }
+
+    void setMessage(String message) {
+        this.message = message;
     }
 
     @Test
@@ -117,6 +119,18 @@ public class PipesTests {
             );
         }
         System.out.println("Finished try session");
+    }
+
+    @Test
+    void testRunPipesSessionWithException() throws DagsterPipesException {
+        PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
+        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
+        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
+
+        PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
+        session.runPipesSession((session1) -> {
+            throw new Exception(this.message);
+        });
     }
 
     public Map<String, PipesMetadata> buildTestMetadata() {

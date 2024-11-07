@@ -10,6 +10,7 @@ import pipes.writers.PipesMessageWriterChannel;
 
 import java.util.logging.Logger;
 
+import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 
 public class PipesSession {
@@ -20,7 +21,7 @@ public class PipesSession {
     public PipesSession(
         PipesParamsLoader paramsLoader,
         PipesContextLoader contextLoader,
-        PipesMessageWriter<PipesMessageWriterChannel> messageWriter
+        PipesMessageWriter<? extends PipesMessageWriterChannel> messageWriter
     ) throws DagsterPipesException {
         this.context = buildContext(paramsLoader, contextLoader, messageWriter);
     }
@@ -29,7 +30,6 @@ public class PipesSession {
         try {
             runnable.run(this);
         } catch (Exception exception) {
-            System.out.println("pipesExc! " + exception.getMessage());
             this.context.reportException(exception);
         } finally {
             this.context.close();
@@ -43,7 +43,7 @@ public class PipesSession {
     private PipesContext buildContext(
         PipesParamsLoader paramsLoader,
         PipesContextLoader contextLoader,
-        PipesMessageWriter<PipesMessageWriterChannel> messageWriter
+        PipesMessageWriter<? extends PipesMessageWriterChannel> messageWriter
     ) throws DagsterPipesException {
         if (PipesContext.isInitialized()) {
             return PipesContext.get();

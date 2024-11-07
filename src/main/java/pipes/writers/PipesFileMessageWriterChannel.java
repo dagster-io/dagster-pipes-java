@@ -5,8 +5,9 @@ import pipes.DagsterPipesException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Map;
 
-public class PipesFileMessageWriterChannel implements PipesMessageWriterChannel {
+public class PipesFileMessageWriterChannel extends PipesMessageWriter<PipesMessageWriterChannel> implements PipesMessageWriterChannel {
 
     private final String path;
 
@@ -27,6 +28,7 @@ public class PipesFileMessageWriterChannel implements PipesMessageWriterChannel 
         try (FileWriter fileWriter = new FileWriter(file, true)) {
             System.out.println(file.getAbsolutePath());
             fileWriter.write(message.toString() + System.lineSeparator());
+            fileWriter.flush();
         } catch (IOException ioException) {
             throw new DagsterPipesException("Failed to write to the file: " + path, ioException);
         }
@@ -34,5 +36,10 @@ public class PipesFileMessageWriterChannel implements PipesMessageWriterChannel 
 
     public String getPath() {
         return path;
+    }
+
+    @Override
+    public PipesMessageWriterChannel open(Map<String, Object> params) {
+        return this;
     }
 }

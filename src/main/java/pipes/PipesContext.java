@@ -24,7 +24,7 @@ public class PipesContext {
     public PipesContext(
         PipesParamsLoader paramsLoader,
         PipesContextLoader contextLoader,
-        PipesMessageWriter<PipesMessageWriterChannel> messageWriter
+        PipesMessageWriter<? extends PipesMessageWriterChannel> messageWriter
     ) throws DagsterPipesException {
         Optional<Map<String, Object>> contextParams = paramsLoader.loadContextParams();
         Optional<Map<String, Object>> messageParams = paramsLoader.loadMessagesParams();
@@ -252,8 +252,10 @@ public class PipesContext {
         Map<String, PipesMetadata> pipesMetadata,
         String assetKey
     ) throws DagsterPipesException {
+        System.out.println("was: " + checkName + " " + passed + " " + assetKey);
         assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
         assetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
+        System.out.println("resolved:" + assetKey);
         this.writeMessage(
             Method.REPORT_ASSET_CHECK,
             this.createMap(assetKey, checkName, passed, severity, pipesMetadata)
@@ -304,7 +306,6 @@ public class PipesContext {
         Method method
     ) throws DagsterPipesException {
         List<String> definedAssetKeys = this.data.getAssetKeys();
-        System.out.println("definedAssetKeys " + definedAssetKeys.size());
         String resultAssetKey = assetKey;
         if (assetKey == null) {
             if (definedAssetKeys.size() != 1) {
