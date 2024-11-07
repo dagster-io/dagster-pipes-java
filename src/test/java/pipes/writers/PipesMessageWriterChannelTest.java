@@ -3,6 +3,7 @@ package pipes.writers;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
+import pipes.DagsterPipesException;
 import pipes.PipesTests;
 import types.Method;
 
@@ -32,7 +33,7 @@ class PipesMessageWriterChannelTest {
     }
 
     @Test
-    void testPipesFileMessageWriterChannel() throws IOException {
+    void testPipesFileMessageWriterChannel() throws DagsterPipesException, IOException {
         Path filePath = tempDir.resolve("message.txt");
         PipesFileMessageWriterChannel fileWriter = new PipesFileMessageWriterChannel(
             filePath.toString()

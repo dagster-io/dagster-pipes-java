@@ -27,7 +27,8 @@ public class PipesFileMessageWriterChannel implements PipesMessageWriterChannel 
         try (FileWriter fileWriter = new FileWriter(file, true)) {
             System.out.println(file.getAbsolutePath());
             fileWriter.write(message.toString() + System.lineSeparator());
-            fileWriter.flush();
+        } catch (IOException ioException) {
+            throw new DagsterPipesException("Failed to write to the file: " + path, ioException);
         }
     }
 
