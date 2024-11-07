@@ -73,10 +73,10 @@ public class MainTest implements Runnable {
     private String reportAssetMaterializationJson;
 
     @CommandLine.Option(
-        names = {"--throw-exception"},
+        names = {"--throw-error"},
         description = "Throw exception in PipesSession with specified message"
     )
-    private String throwExceptionMessage;
+    private boolean throwException = false;
 
     @Override
     public void run() {
@@ -97,8 +97,8 @@ public class MainTest implements Runnable {
                 pipesTests.setPayload(payload);
             }
 
-            if (this.throwExceptionMessage != null) {
-                pipesTests.setMessage(this.throwExceptionMessage);
+            if (this.throwException) {
+                pipesTests.throwException();
                 pipesTests.testRunPipesSessionWithException();
             }
 

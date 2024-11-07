@@ -19,7 +19,7 @@ public class PipesTests {
     private Map<String, Object> extras;
     private String jobName;
     private Object payload;
-    private String message;
+    private boolean throwException = false;
 
     private Map<String, PipesMetadata> metadata = null;
 
@@ -67,8 +67,8 @@ public class PipesTests {
         this.checkAssetKey = assetKey;
     }
 
-    void setMessage(String message) {
-        this.message = message;
+    void throwException() {
+        this.throwException = true;
     }
 
     @Test
@@ -129,7 +129,7 @@ public class PipesTests {
 
         PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
         session.runPipesSession((session1) -> {
-            throw new Exception(this.message);
+            throw new Exception("Very bad Java exception happened!");
         });
     }
 
