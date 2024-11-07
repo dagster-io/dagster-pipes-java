@@ -8,6 +8,7 @@ from dagster import (
     AssetKey,
     DataVersion,
     AssetCheckSpec,
+    AssetCheckResult,
 )
 from dagster_pipes import PipesAssetCheckSeverity
 from typing import Dict, Any, Optional, List, cast
@@ -181,6 +182,44 @@ def test_java_pipes_extras(
     )
 
     assert result.success
+
+    captured = capsys.readouterr()
+
+    assert (
+        "[pipes] did not receive any messages from external process" not in captured.err
+    )
+
+
+def test_java_pipes_error_logging(
+    tmpdir_factory,
+    capsys,
+):
+    @asset
+    def java_asset(
+        context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
+    ):
+        args = [
+            "java",
+            "-jar",
+            str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            "--full",
+            "--throw-error",
+        ]
+
+        invocation_result = pipes_subprocess_client.run(
+            context=context,
+            command=args,
+        )
+
+        yield from invocation_result.get_results()
+
+    result = materialize(
+        [java_asset],
+        resources={"pipes_subprocess_client": PipesSubprocessClient()},
+        raise_on_error=False,
+    )
+
+    assert not result.success
 
     captured = capsys.readouterr()
 
@@ -394,7 +433,7 @@ def test_java_pipes_report_asset_check(
     )
     def java_asset(
         context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
-    ) -> MaterializeResult:
+    ):
         job_name = context.dagster_run.job_name
 
         args = [
@@ -413,14 +452,18 @@ def test_java_pipes_report_asset_check(
             command=args,
         )
 
-        check_result = invocation_result.get_asset_check_result()
+        results = invocation_result.get_results()
+
+        check_result = results[0]
+
+        assert isinstance(check_result, AssetCheckResult)
 
         assert check_result.passed == passed
 
         if check_result.metadata is not None:
             assert_known_metadata(check_result.metadata)
 
-        return invocation_result.get_materialize_result()
+        yield from results
 
     result = materialize(
         [java_asset],
