@@ -53,6 +53,7 @@ public class PipesContext {
             }
             this.messageChannel.writeMessage(PipesUtils.makeMessage(Method.CLOSED, payload));
             this.closed = true;
+            throw new DagsterPipesException("Exception in PipesSession", this.exception);
         }
     }
 
