@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import picocli.CommandLine;
 import pipes.data.PipesConstants;
-import types.PipesMetadataValue;
 
 import java.io.File;
 import java.io.IOException;
@@ -73,6 +72,12 @@ public class MainTest implements Runnable {
     )
     private String reportAssetMaterializationJson;
 
+    @CommandLine.Option(
+        names = {"--throw-error"},
+        description = "Throw exception in PipesSession with specified message"
+    )
+    private boolean throwException = false;
+
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
@@ -92,21 +97,28 @@ public class MainTest implements Runnable {
                 pipesTests.setPayload(payload);
             }
 
+            if (this.throwException) {
+                pipesTests.throwException();
+                pipesTests.testRunPipesSessionWithException();
+            }
+
             if (this.reportAssetMaterializationJson != null && !this.reportAssetMaterializationJson.isEmpty()) {
                 cacheJson(this.reportAssetMaterializationJson);
-                Map<String, PipesMetadataValue> metadata = loadParamByWrapperKey("metadata", Map.class);
                 String dataVersion = loadParamByWrapperKey("dataVersion", String.class);
                 String assetKey = loadParamByWrapperKey("assetKey", String.class);
-                pipesTests.setMaterialization(metadata, dataVersion, assetKey);
+                pipesTests.setMaterialization(dataVersion, assetKey);
             }
 
             if (this.reportAssetCheckJson != null && !this.reportAssetCheckJson.isEmpty()) {
                 cacheJson(this.reportAssetCheckJson);
                 String checkName = loadParamByWrapperKey("checkName", String.class);
                 boolean passed = loadParamByWrapperKey("passed", Boolean.class);
-                Map<String, PipesMetadataValue> metadata = loadParamByWrapperKey("metadata", Map.class);
                 String assetKey = loadParamByWrapperKey("assetKey", String.class);
-                pipesTests.setCheck(checkName, passed, metadata, assetKey);
+                System.out.printf(
+                    "checkName: %s \npassed: %s \nassetKey: %s%n",
+                    checkName, passed, assetKey
+                );
+                pipesTests.setCheck(checkName, passed, assetKey);
             }
 
             if (this.full) {
@@ -114,7 +126,6 @@ public class MainTest implements Runnable {
                 return;
             } else {
                 pipesTests.setContextData();
-                pipesTests.setWriter();
             }
 
             if (this.extras != null) {

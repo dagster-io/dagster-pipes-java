@@ -4,15 +4,10 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pipes.data.PipesContextData;
-import pipes.loaders.PipesContextLoader;
-import pipes.loaders.PipesDefaultContextLoader;
-import pipes.loaders.PipesEnvVarParamsLoader;
-import pipes.loaders.PipesParamsLoader;
+import pipes.loaders.*;
 import pipes.writers.*;
-import types.PipesMetadataValue;
 import types.Type;
 
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -21,17 +16,15 @@ public class PipesTests {
 
     private Map<String, String> input;
     private PipesContextData contextData;
-    private PipesMessageWriterChannel writer;
     private Map<String, Object> extras;
     private String jobName;
     private Object payload;
+    private boolean throwException = false;
 
     private Map<String, PipesMetadata> metadata = null;
 
     //Related to reportAssetMaterialization
     private boolean materialization = false;
-    // TODO:: remove?
-    //  private Map<String, PipesMetadataValue> materializationMetadata;
     private String dataVersion;
     private String materializationAssetKey;
 
@@ -39,8 +32,6 @@ public class PipesTests {
     private boolean check = false;
     private String checkName;
     private boolean passed;
-    // TODO:: remove?
-    //  private Map<String, PipesMetadataValue> checkMetadata;
     private String checkAssetKey;
 
     void setInput(Map<String, String> input) {
@@ -55,18 +46,6 @@ public class PipesTests {
         this.jobName = jobName;
     }
 
-    void setWriter(PipesMessageWriterChannel writer) {
-        this.writer = writer;
-    }
-
-    void setWriter() throws DagsterPipesException {
-        this.writer = WriterChannelLoader.getWriter(input);
-    }
-
-    void setContextData(PipesContextData contextData) {
-        this.contextData = contextData;
-    }
-
     void setContextData() throws DagsterPipesException {
         this.contextData = DataLoader.getData(input);
     }
@@ -75,23 +54,21 @@ public class PipesTests {
         this.payload = payload;
     }
 
-    void setMaterialization(
-        Map<String, PipesMetadataValue> metadata, String dataVersion, String assetKey
-    ) {
+    void setMaterialization(String dataVersion, String assetKey) {
         this.materialization = true;
-        //this.materializationMetadata = metadata;
         this.dataVersion = dataVersion;
         this.materializationAssetKey = assetKey;
     }
 
-    void setCheck(
-        String checkName, boolean passed, Map<String, PipesMetadataValue> metadata, String assetKey
-    ) {
+    void setCheck(String checkName, boolean passed, String assetKey) {
         this.check = true;
         this.checkName = checkName;
         this.passed = passed;
-        //this.checkMetadata = metadata;
         this.checkAssetKey = assetKey;
+    }
+
+    void throwException() {
+        this.throwException = true;
     }
 
     @Test
@@ -114,35 +91,46 @@ public class PipesTests {
     }
 
     @Test
-    public void fullTest() throws DagsterPipesException, IOException {
+    public void fullTest() throws DagsterPipesException {
         PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
         PipesContextLoader contextLoader = new PipesDefaultContextLoader();
-        PipesMessageWriter messageWriter = new PipesDefaultMessageWriter();
-        PipesContext pipesContext = new PipesContext(paramsLoader, contextLoader, messageWriter);
-        try (PipesSession session = new PipesSession(pipesContext)) {
-            session.openDagsterPipes(paramsLoader, contextLoader, messageWriter);
-            System.out.println("Opened dagster pipes with set params.");
-            if (this.payload != null) {
-                session.getContext().reportCustomMessage(this.payload);
-                System.out.println("Payload reported with custom message.");
-            }
+        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
 
-            if (this.materialization) {
-                buildTestMetadata();
-                session.getContext().reportAssetMaterialization(
-                    this.metadata, this.dataVersion, this.materializationAssetKey
-                );
-            }
-            if (this.check) {
-                buildTestMetadata();
-                session.getContext().reportAssetCheck(
-                    this.checkName, this.passed, this.metadata, this.checkAssetKey
-                );
-            }
-            System.out.println("Finished try session");
-        } catch (Exception exception) {
-            pipesContext.reportException(exception);
+        PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
+        session.runPipesSession(this::fullTest);
+    }
+
+    private void fullTest(PipesSession session) throws DagsterPipesException {
+        if (this.payload != null) {
+            session.getContext().reportCustomMessage(this.payload);
+            System.out.println("Payload reported with custom message.");
         }
+
+        if (this.materialization) {
+            buildTestMetadata();
+            session.getContext().reportAssetMaterialization(
+                this.metadata, this.dataVersion, this.materializationAssetKey
+            );
+        }
+        if (this.check) {
+            buildTestMetadata();
+            session.getContext().reportAssetCheck(
+                this.checkName, this.passed, this.metadata, this.checkAssetKey
+            );
+        }
+        System.out.println("Finished try session");
+    }
+
+    @Test
+    void testRunPipesSessionWithException() throws DagsterPipesException {
+        PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
+        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
+        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
+
+        PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
+        session.runPipesSession((session1) -> {
+            throw new Exception("Very bad Java exception happened!");
+        });
     }
 
     public Map<String, PipesMetadata> buildTestMetadata() {

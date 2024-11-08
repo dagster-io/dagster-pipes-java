@@ -8,7 +8,6 @@ import pipes.utils.PipesUtils;
 import pipes.writers.PipesMessageWriter;
 import pipes.writers.PipesMessageWriterChannel;
 
-import java.io.IOException;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -23,10 +22,10 @@ public class PipesContext {
     private Exception exception;
 
     public PipesContext(
-        PipesParamsLoader paramsLoader,
-        PipesContextLoader contextLoader,
-        PipesMessageWriter messageWriter
-    ) throws DagsterPipesException, IOException {
+            PipesParamsLoader paramsLoader,
+            PipesContextLoader contextLoader,
+            PipesMessageWriter<? extends PipesMessageWriterChannel> messageWriter
+    ) throws DagsterPipesException {
         Optional<Map<String, Object>> contextParams = paramsLoader.loadContextParams();
         Optional<Map<String, Object>> messageParams = paramsLoader.loadMessagesParams();
         if (contextParams.isPresent() && messageParams.isPresent()) {
@@ -46,16 +45,16 @@ public class PipesContext {
         this.exception = exception;
     }
 
-    public void close() throws Exception {
+    public void close() throws DagsterPipesException {
         if (!this.closed) {
             Map<String, Object> payload = new HashMap<>();
             if (this.exception != null) {
-                payload.put("exception", this.exception.getMessage());
+                payload.put("exception", new PipesException(exception));
             }
             this.messageChannel.writeMessage(PipesUtils.makeMessage(Method.CLOSED, payload));
             this.closed = true;
             if (this.exception != null) {
-                throw this.exception;
+                throw new DagsterPipesException("Exception in PipesSession", this.exception);
             }
         }
     }
@@ -71,22 +70,22 @@ public class PipesContext {
     public static PipesContext get() {
         if (instance == null) {
             throw new IllegalStateException(
-                "PipesContext has not been initialized. You must call openDagsterPipes()."
+                    "PipesContext has not been initialized. You must call openDagsterPipes()."
             );
         }
         return instance;
     }
 
-    public void reportCustomMessage(Object payload) throws DagsterPipesException, IOException {
+    public void reportCustomMessage(Object payload) throws DagsterPipesException {
         Map<String, Object> map = new HashMap<>();
         map.put("payload", payload);
         writeMessage(Method.REPORT_CUSTOM_MESSAGE, map);
     }
 
     private void writeMessage(
-        Method method,
-        Map<String, Object> params
-    ) throws DagsterPipesException, IOException {
+            Method method,
+            Map<String, Object> params
+    ) throws DagsterPipesException {
         if (this.closed) {
             throw new DagsterPipesException("Cannot send message after pipes context is closed.");
         }
@@ -176,7 +175,7 @@ public class PipesContext {
         Map<String, Object> extras = this.data.getExtras();
         if (!extras.containsKey(key)) {
             throw new DagsterPipesException(
-                String.format("Extra %s is undefined. Extras must be provided by user.", key)
+                    String.format("Extra %s is undefined. Extras must be provided by user.", key)
             );
         }
         return extras.get(key);
@@ -193,7 +192,7 @@ public class PipesContext {
     private static void assertSingleAsset(Collection<?> collection, String name) throws DagsterPipesException {
         if (collection.size() != 1) {
             throw new DagsterPipesException(
-                String.format("%s is undefined. Current step targets multiple assets.", name)
+                    String.format("%s is undefined. Current step targets multiple assets.", name)
             );
         }
     }
@@ -201,7 +200,7 @@ public class PipesContext {
     private static void assertSingleAsset(Map<?, ?> map, String name) throws DagsterPipesException {
         if (map.size() != 1) {
             throw new DagsterPipesException(
-                String.format("%s is undefined. Current step targets multiple assets.", name)
+                    String.format("%s is undefined. Current step targets multiple assets.", name)
             );
         }
     }
@@ -209,76 +208,78 @@ public class PipesContext {
     private static void assertPresence(Object object, String name) throws DagsterPipesException {
         if (object == null) {
             throw new DagsterPipesException(
-                String.format("%s is undefined. Current step does not target an asset.", name)
+                    String.format("%s is undefined. Current step does not target an asset.", name)
             );
         }
         if (object instanceof Collection<?> && ((Collection<?>) object).isEmpty()) {
             throw new DagsterPipesException(
-                String.format("%s is empty. Current step does not target an asset.", name)
+                    String.format("%s is empty. Current step does not target an asset.", name)
             );
         }
     }
 
     public void reportAssetMaterialization(
-        Map<String, PipesMetadata> pipesMetadata,
-        String dataVersion,
-        String assetKey
-    ) throws DagsterPipesException, IOException {
+            Map<String, PipesMetadata> pipesMetadata,
+            String dataVersion,
+            String assetKey
+    ) throws DagsterPipesException {
         assetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_MATERIALIZATION);
         if (this.materializedAssets.contains(assetKey)) {
             throw new IllegalStateException(
-                "Asset keys: " + assetKey + " has already been materialized, cannot report additional data."
+                    "Asset keys: " + assetKey + " has already been materialized, cannot report additional data."
             );
         }
         System.out.println("writing message...");
         this.writeMessage(
-            Method.REPORT_ASSET_MATERIALIZATION,
-            this.createMap(assetKey, dataVersion, pipesMetadata)
+                Method.REPORT_ASSET_MATERIALIZATION,
+                this.createMap(assetKey, dataVersion, pipesMetadata)
         );
         materializedAssets.add(assetKey);
     }
 
     public void reportAssetCheck(
-        String checkName,
-        boolean passed,
-        Map<String, PipesMetadata> pipesMetadata,
-        String assetKey
-    ) throws DagsterPipesException, IOException {
+            String checkName,
+            boolean passed,
+            Map<String, PipesMetadata> pipesMetadata,
+            String assetKey
+    ) throws DagsterPipesException {
         reportAssetCheck(
-            checkName, passed, PipesAssetCheckSeverity.ERROR, pipesMetadata, assetKey
+                checkName, passed, PipesAssetCheckSeverity.ERROR, pipesMetadata, assetKey
         );
     }
 
     public void reportAssetCheck(
-        String checkName,
-        boolean passed,
-        PipesAssetCheckSeverity severity,
-        Map<String, PipesMetadata> pipesMetadata,
-        String assetKey
-    ) throws DagsterPipesException, IOException {
+            String checkName,
+            boolean passed,
+            PipesAssetCheckSeverity severity,
+            Map<String, PipesMetadata> pipesMetadata,
+            String assetKey
+    ) throws DagsterPipesException {
+        System.out.println("was: " + checkName + " " + passed + " " + assetKey);
         assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
         assetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
+        System.out.println("resolved:" + assetKey);
         this.writeMessage(
-            Method.REPORT_ASSET_CHECK,
-            this.createMap(assetKey, checkName, passed, severity, pipesMetadata)
+                Method.REPORT_ASSET_CHECK,
+                this.createMap(assetKey, checkName, passed, severity, pipesMetadata)
         );
     }
 
     private void assertNotNull(Object value, Method method, String param) throws DagsterPipesException {
         if (value == null) {
             throw new DagsterPipesException(
-                String.format(
-                    "Null parameter `%s` for %s",
-                    param, method.toValue()
-                )
+                    String.format(
+                            "Null parameter `%s` for %s",
+                            param, method.toValue()
+                    )
             );
         }
     }
 
     private Map<String, Object> createMap(
-        String assetKey,
-        String dataVersion,
-        Map<String, PipesMetadata> pipesMetadata
+            String assetKey,
+            String dataVersion,
+            Map<String, PipesMetadata> pipesMetadata
     ) {
         Map<String, Object> message = new HashMap<>();
         message.put("asset_key", assetKey);
@@ -288,11 +289,11 @@ public class PipesContext {
     }
 
     private Map<String, Object> createMap(
-        String assetKey,
-        String checkName,
-        boolean passed,
-        PipesAssetCheckSeverity severity,
-        Map<String, PipesMetadata> pipesMetadata
+            String assetKey,
+            String checkName,
+            boolean passed,
+            PipesAssetCheckSeverity severity,
+            Map<String, PipesMetadata> pipesMetadata
     ) {
         Map<String, Object> message = new HashMap<>();
         message.put("asset_key", assetKey);
@@ -304,39 +305,38 @@ public class PipesContext {
     }
 
     private String resolveOptionallyPassedAssetKey(
-        String assetKey,
-        Method method
+            String assetKey,
+            Method method
     ) throws DagsterPipesException {
         List<String> definedAssetKeys = this.data.getAssetKeys();
-        System.out.println("definedAssetKeys " + definedAssetKeys.size());
         String resultAssetKey = assetKey;
         if (assetKey == null) {
             if (definedAssetKeys.size() != 1) {
                 throw new DagsterPipesException(
-                    String.format(
-                        "Calling %s without passing an asset key is undefined. Current step targets multiple assets.",
-                        method.toValue()
-                    )
+                        String.format(
+                                "Calling %s without passing an asset key is undefined. Current step targets multiple assets.",
+                                method.toValue()
+                        )
                 );
             }
             resultAssetKey = definedAssetKeys.get(0);
         } else {
             if (!definedAssetKeys.contains(assetKey)) {
                 throw new DagsterPipesException(
-                    String.format("Invalid asset key. Expected one of %s, got %s.",
-                        definedAssetKeys,
-                        assetKey
-                    )
+                        String.format("Invalid asset key. Expected one of %s, got %s.",
+                                definedAssetKeys,
+                                assetKey
+                        )
                 );
             }
         }
 
         if (resultAssetKey.isEmpty()) {
             throw new DagsterPipesException(
-                String.format(
-                    "Calling %s without passing an asset key is undefined. Current step does not target a specific asset.",
-                    method.toValue()
-                )
+                    String.format(
+                            "Calling %s without passing an asset key is undefined. Current step does not target a specific asset.",
+                            method.toValue()
+                    )
             );
         }
 
