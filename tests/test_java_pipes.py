@@ -24,6 +24,47 @@ from dagster._core.pipes.utils import (
 from dagster._core.pipes.client import PipesContextInjector
 import json
 from hypothesis_jsonschema import from_schema
+from contextlib import contextmanager
+from threading import Event, Thread
+from typing import Iterator
+
+from dagster_pipes import (
+    PipesDefaultMessageWriter,
+    PipesParams,
+)
+
+from dagster._core.pipes.context import (
+    PipesMessageHandler,
+)
+
+
+@contextmanager
+def read_messages(
+    self: PipesFileMessageReader,
+    handler: "PipesMessageHandler",
+) -> Iterator[PipesParams]:
+    is_session_closed = Event()
+    thread = None
+    try:
+        open(self._path, "w").close()  # create file   # type: ignore
+        thread = Thread(
+            target=self._reader_thread,  # type: ignore
+            args=(handler, is_session_closed),
+            daemon=True,
+        )
+        thread.start()
+        yield {PipesDefaultMessageWriter.FILE_PATH_KEY: self._path}  # type: ignore
+    finally:
+        is_session_closed.set()
+        if thread:
+            thread.join()
+
+
+# patch the read_messages method of PipesFileMessageReader to avoid deleting the file
+# once the session is closed
+# which is useful for testing messages
+PipesFileMessageReader.read_messages = read_messages
+
 
 extras_strategy = from_schema({"type": ["object"]})
 
@@ -194,6 +235,10 @@ def test_java_pipes_error_logging(
     tmpdir_factory,
     capsys,
 ):
+    work_dir = tmpdir_factory.mktemp("work_dir")
+
+    messages_file = work_dir / "messages"
+
     @asset
     def java_asset(
         context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
@@ -215,9 +260,27 @@ def test_java_pipes_error_logging(
 
     result = materialize(
         [java_asset],
-        resources={"pipes_subprocess_client": PipesSubprocessClient()},
+        resources={
+            "pipes_subprocess_client": PipesSubprocessClient(
+                message_reader=PipesFileMessageReader(str(messages_file))
+            )
+        },
         raise_on_error=False,
     )
+
+    with open(str(messages_file), "r") as f:
+        for line in f.readlines():
+            message = json.loads(line)
+            method = message["method"]
+
+            if method == "closed":
+                exception = message["params"]["exception"]
+
+                assert exception["name"] == "java.lang.Exception"
+                assert exception["message"] == "Very bad Java exception happened!"
+                assert exception["stack"] is not None
+
+    result.all_events
 
     assert not result.success
 
