@@ -49,7 +49,7 @@ public class PipesContext {
         if (!this.closed) {
             Map<String, Object> payload = new HashMap<>();
             if (this.exception != null) {
-                payload.put("exception", this.exception.getMessage());
+                payload.put("exception", new PipesException(exception));
             }
             this.messageChannel.writeMessage(PipesUtils.makeMessage(Method.CLOSED, payload));
             this.closed = true;
