@@ -1,5 +1,5 @@
 package pipes;
 
 public interface ThrowingConsumer {
-    void run(PipesSession session) throws Exception;
+    void run(PipesContext context) throws Exception;
 }

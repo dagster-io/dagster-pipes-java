@@ -36,7 +36,7 @@ public final class PipesUtils {
         return expectedType.cast(value);
     }
 
-    public static PipesMessage makeMessage(Method method, Map<String, Object> params) {
+    public static PipesMessage makeMessage(Method method, Map<String, ?> params) {
         return new PipesMessage(PipesConstants.PIPES_PROTOCOL_VERSION.toString(), method.toValue(), params);
     }
 }

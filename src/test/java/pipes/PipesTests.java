@@ -5,11 +5,13 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pipes.data.PipesContextData;
 import pipes.loaders.*;
+import pipes.logger.PipesLogLevel;
 import pipes.writers.*;
 import types.Type;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.logging.LogRecord;
 
 @Disabled
 public class PipesTests {
@@ -97,28 +99,27 @@ public class PipesTests {
         PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
 
         PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
-        session.runPipesSession(this::fullTest);
+        session.runDagsterPipes(this::fullTest);
     }
 
-    private void fullTest(PipesSession session) throws DagsterPipesException {
+    private void fullTest(PipesContext context) throws DagsterPipesException {
         if (this.payload != null) {
-            session.getContext().reportCustomMessage(this.payload);
+            context.reportCustomMessage(this.payload);
             System.out.println("Payload reported with custom message.");
         }
 
         if (this.materialization) {
             buildTestMetadata();
-            session.getContext().reportAssetMaterialization(
+            context.reportAssetMaterialization(
                 this.metadata, this.dataVersion, this.materializationAssetKey
             );
         }
         if (this.check) {
             buildTestMetadata();
-            session.getContext().reportAssetCheck(
+            context.reportAssetCheck(
                 this.checkName, this.passed, this.metadata, this.checkAssetKey
             );
         }
-        System.out.println("Finished try session");
     }
 
     @Test
@@ -128,7 +129,7 @@ public class PipesTests {
         PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
 
         PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
-        session.runPipesSession((session1) -> {
+        session.runDagsterPipes((session1) -> {
             throw new Exception("Very bad Java exception happened!");
         });
     }

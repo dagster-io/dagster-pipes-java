@@ -1,5 +1,6 @@
 package pipes;
 
+import pipes.logger.PipesLogger;
 import types.*;
 import pipes.data.*;
 import pipes.loaders.PipesContextLoader;
@@ -18,8 +19,10 @@ public class PipesContext {
     private PipesMessageWriterChannel messageChannel = null;
     private final Set<String> materializedAssets;
     private boolean closed;
-    private final Logger logger;
-    private Exception exception;
+    static final PipesLogger logger = new PipesLogger(
+        Logger.getLogger(PipesContext.class.getName())
+    );
+    private Exception exception = null;
 
     public PipesContext(
             PipesParamsLoader paramsLoader,
@@ -34,11 +37,8 @@ public class PipesContext {
             Map<String, Object> openedPayload = messageWriter.getOpenedPayload();
             this.messageChannel.writeMessage(PipesUtils.makeMessage(Method.OPENED, openedPayload));
         }
-        // ToDO:: fix logger
-        this.logger = Logger.getLogger(PipesContext.class.getName());
         this.materializedAssets = new HashSet<>();
         this.closed = false;
-        this.exception = null;
     }
 
     public void reportException(Exception exception) {
@@ -185,8 +185,8 @@ public class PipesContext {
         return this.data.getExtras();
     }
 
-    public Logger getLogger() {
-        return this.logger;
+    public PipesLogger getLogger() {
+        return logger;
     }
 
     private static void assertSingleAsset(Collection<?> collection, String name) throws DagsterPipesException {
