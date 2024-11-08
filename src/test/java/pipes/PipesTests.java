@@ -87,12 +87,7 @@ public class PipesTests {
 
     @Test
     public void fullTest() throws DagsterPipesException {
-        PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
-        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
-        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
-
-        PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
-        session.runDagsterPipes(this::fullTest);
+        getTestSession().runDagsterPipes(this::fullTest);
     }
 
     private void fullTest(PipesContext context) throws DagsterPipesException {
@@ -117,13 +112,20 @@ public class PipesTests {
 
     @Test
     void testRunPipesSessionWithException() throws DagsterPipesException {
-        PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
-        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
-        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
-
-        PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
-        session.runDagsterPipes((session1) -> {
+        getTestSession().runDagsterPipes((context) -> {
             throw new Exception("Very bad Java exception happened!");
+        });
+    }
+
+    @Test
+    void testLogging() throws DagsterPipesException {
+        getTestSession().runDagsterPipes((context) -> {
+            context.getLogger().debug("Debug message");
+            context.getLogger().info("Info message");
+            context.getLogger().warning("Warning message");
+            context.getLogger().exception("Exception message");
+            context.getLogger().error("Error message");
+            context.getLogger().critical("Critical message");
         });
     }
 
@@ -157,5 +159,12 @@ public class PipesTests {
             this.metadata.put("json", new PipesMetadata(jsonMap, Type.JSON));
         }
         return this.metadata;
+    }
+
+    private PipesSession getTestSession() throws DagsterPipesException {
+        PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
+        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
+        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
+        return new PipesSession(paramsLoader, contextLoader, messageWriter);
     }
 }

@@ -78,6 +78,12 @@ public class MainTest implements Runnable {
     )
     private boolean throwException = false;
 
+    @CommandLine.Option(
+        names = {"--logging"},
+        description = "Flag to test logging"
+    )
+    private boolean logging = false;
+
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
@@ -100,6 +106,11 @@ public class MainTest implements Runnable {
 
             if (this.throwException) {
                 pipesTests.testRunPipesSessionWithException();
+                return;
+            }
+
+            if (this.logging) {
+                pipesTests.testLogging();
                 return;
             }
 
