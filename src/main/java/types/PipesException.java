@@ -2,12 +2,9 @@ package types;
 
 import com.fasterxml.jackson.annotation.*;
 
-/**
- * exception that explicitly led to this exception
- */
-public class ExceptionCause {
-    private CauseCause cause;
-    private CauseContext context;
+public class PipesException {
+    private PipesExceptionCause cause;
+    private PipesExceptionContext context;
     private String message;
     private String name;
     private String[] stack;
@@ -16,17 +13,17 @@ public class ExceptionCause {
      * exception that explicitly led to this exception
      */
     @JsonProperty("cause")
-    public CauseCause getCause() { return cause; }
+    public PipesExceptionCause getCause() { return cause; }
     @JsonProperty("cause")
-    public void setCause(CauseCause value) { this.cause = value; }
+    public void setCause(PipesExceptionCause value) { this.cause = value; }
 
     /**
      * exception that being handled when this exception was raised
      */
     @JsonProperty("context")
-    public CauseContext getContext() { return context; }
+    public PipesExceptionContext getContext() { return context; }
     @JsonProperty("context")
-    public void setContext(CauseContext value) { this.context = value; }
+    public void setContext(PipesExceptionContext value) { this.context = value; }
 
     @JsonProperty("message")
     public String getMessage() { return message; }
