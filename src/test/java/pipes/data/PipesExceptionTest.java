@@ -20,7 +20,7 @@ class PipesExceptionTest {
         payload.put("exception", pipesException);
         String message = PipesUtils.makeMessage(Method.CLOSED, payload).toString();
         Assertions.assertTrue(message.startsWith(
-            "{\"__dagster_pipes_version\":\"0.1\",\"method\":\"closed\",\"params\":{\"exception\":{\"cause\":{\"cause\":null,\"message\":\"Inner exception\",\"name\":\"java.lang.Exception\",\"stack\":null},\"message\":\"Exception message\",\"name\":\"java.lang.Exception\",\"stack\":["
+            "{\"__dagster_pipes_version\":\"0.1\",\"method\":\"closed\",\"params\":{\"exception\":{\"name\":\"java.lang.Exception\",\"message\":\"Exception message\",\"cause\":{\"name\":\"java.lang.Exception\",\"message\":\"Inner exception\",\"cause\":null,\"stack\":null,\"context\":[]},\"stack\":["
         ));
     }
 

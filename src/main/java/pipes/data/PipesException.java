@@ -1,14 +1,17 @@
 package pipes.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Arrays;
 
+@JsonPropertyOrder({"name", "message", "cause", "stack", "context"})
 public class PipesException {
     private PipesException cause;
     private String message;
     private String name;
     private String[] stack;
+    private static final String[] CONTEXT = {};
 
     public PipesException(Throwable exception) {
         this(exception, true);
@@ -45,4 +48,7 @@ public class PipesException {
     public String[] getStack() { return stack; }
     @JsonProperty("stack")
     public void setStack(String[] value) { this.stack = value; }
+
+    @JsonProperty("context")
+    public String[] getContext() { return CONTEXT; }
 }
