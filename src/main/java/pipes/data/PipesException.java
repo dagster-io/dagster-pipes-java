@@ -17,7 +17,7 @@ public class PipesException {
         this(exception, true);
     }
 
-    public PipesException(Throwable exception, boolean withStackTrace) {
+    private PipesException(Throwable exception, boolean withStackTrace) {
         this.cause = exception.getCause() == null ? null : new PipesException(exception.getCause(), false);
         this.message = exception.getMessage();
         this.name = exception.getClass().getTypeName();
