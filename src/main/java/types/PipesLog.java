@@ -3,7 +3,7 @@ package types;
 import java.io.IOException;
 import com.fasterxml.jackson.annotation.*;
 
-public enum Log {
+public enum PipesLog {
     CRITICAL, DEBUG, ERROR, EXCEPTION, INFO, WARNING;
 
     @JsonValue
@@ -20,13 +20,13 @@ public enum Log {
     }
 
     @JsonCreator
-    public static Log forValue(String value) throws IOException {
+    public static PipesLog forValue(String value) throws IOException {
         if (value.equals("CRITICAL")) return CRITICAL;
         if (value.equals("DEBUG")) return DEBUG;
         if (value.equals("ERROR")) return ERROR;
         if (value.equals("EXCEPTION")) return EXCEPTION;
         if (value.equals("INFO")) return INFO;
         if (value.equals("WARNING")) return WARNING;
-        throw new IOException("Cannot deserialize Log");
+        throw new IOException("Cannot deserialize PipesLog");
     }
 }

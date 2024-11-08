@@ -1,5 +1,5 @@
 {
-    "title": "PipesEvent",
+    "title": "PipesMessage",
     "type": "object",
     "properties": {
         "__dagster_pipes_version": {

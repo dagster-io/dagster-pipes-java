@@ -7,7 +7,7 @@ import com.fasterxml.jackson.annotation.*;
  *
  * exception that explicitly led to this exception
  */
-public class ExceptionContext {
+public class PipesExceptionContext {
     private CauseCause cause;
     private CauseContext context;
     private String message;
