@@ -19,7 +19,6 @@ public class PipesTests {
     private Map<String, Object> extras;
     private String jobName;
     private Object payload;
-    private boolean throwException = false;
 
     private Map<String, PipesMetadata> metadata = null;
 
@@ -65,10 +64,6 @@ public class PipesTests {
         this.checkName = checkName;
         this.passed = passed;
         this.checkAssetKey = assetKey;
-    }
-
-    void throwException() {
-        this.throwException = true;
     }
 
     @Test
