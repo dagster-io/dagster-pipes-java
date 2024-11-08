@@ -5,13 +5,11 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pipes.data.PipesContextData;
 import pipes.loaders.*;
-import pipes.logger.PipesLogLevel;
 import pipes.writers.*;
 import types.Type;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.LogRecord;
 
 @Disabled
 public class PipesTests {
