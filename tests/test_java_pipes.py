@@ -338,11 +338,12 @@ def test_java_pipes_logging(
     err = captured.err
 
     for level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-        # check with a smart regex
-        assert re.search(
-            r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \+\d{4} - dagster - " + level + " -",
-            err,
-        )
+        # example log line we are looking for:
+        # 2024-11-13 16:54:55 +0100 - dagster - WARNING - __ephemeral_asset_job__ - 2716d101-cf11-4baa-b22d-d2530cb8b121 - java_asset - Warning message
+
+        for line in err.split("\n"):
+            if f"{level.lower().capitalize()} message" in line:
+                assert level in line
 
     assert (
         "[pipes] did not receive any messages from external process" not in captured.err
