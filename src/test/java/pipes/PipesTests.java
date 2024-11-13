@@ -123,7 +123,6 @@ public class PipesTests {
             context.getLogger().debug("Debug message");
             context.getLogger().info("Info message");
             context.getLogger().warning("Warning message");
-            context.getLogger().exception("Exception message");
             context.getLogger().error("Error message");
             context.getLogger().critical("Critical message");
         });
