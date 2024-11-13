@@ -19,9 +19,7 @@ public class PipesContext {
     private PipesMessageWriterChannel messageChannel = null;
     private final Set<String> materializedAssets;
     private boolean closed;
-    static final PipesLogger logger = new PipesLogger(
-        Logger.getLogger(PipesContext.class.getName())
-    );
+    private final PipesLogger logger;
     private Exception exception = null;
 
     public PipesContext(
@@ -39,6 +37,9 @@ public class PipesContext {
         }
         this.materializedAssets = new HashSet<>();
         this.closed = false;
+        this.logger = new PipesLogger(
+            Logger.getLogger(PipesContext.class.getName()), this.messageChannel
+        );
     }
 
     public void reportException(Exception exception) {
@@ -186,7 +187,7 @@ public class PipesContext {
     }
 
     public PipesLogger getLogger() {
-        return logger;
+        return this.logger;
     }
 
     private static void assertSingleAsset(Collection<?> collection, String name) throws DagsterPipesException {
