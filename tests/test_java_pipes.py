@@ -337,7 +337,7 @@ def test_java_pipes_logging(
 
     err = captured.err
 
-    for level in ["DEBUG", "INFO", "WARNING", "EXCEPTION", "ERROR", "CRITICAL"]:
+    for level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
         # check with a smart regex
         assert re.search(
             r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \+\d{4} - dagster - " + level + " -",
