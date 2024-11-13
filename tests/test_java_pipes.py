@@ -231,7 +231,7 @@ def test_java_pipes_extras(
     )
 
 
-def test_java_pipes_error_logging(
+def test_java_pipes_exception_logging(
     tmpdir_factory,
     capsys,
 ):
@@ -283,6 +283,52 @@ def test_java_pipes_error_logging(
     result.all_events
 
     assert not result.success
+
+    captured = capsys.readouterr()
+
+    assert (
+        "[pipes] did not receive any messages from external process" not in captured.err
+    )
+
+
+def test_java_pipes_logging(
+    tmpdir_factory,
+    capsys,
+):
+    work_dir = tmpdir_factory.mktemp("work_dir")
+
+    messages_file = work_dir / "messages"
+
+    @asset
+    def java_asset(
+        context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
+    ):
+        args = [
+            "java",
+            "-jar",
+            str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            "--full",
+            "--logging",
+        ]
+
+        invocation_result = pipes_subprocess_client.run(
+            context=context,
+            command=args,
+        )
+
+        yield from invocation_result.get_results()
+
+    result = materialize(
+        [java_asset],
+        resources={
+            "pipes_subprocess_client": PipesSubprocessClient(
+                message_reader=PipesFileMessageReader(str(messages_file))
+            )
+        },
+        raise_on_error=False,
+    )
+
+    assert result.success
 
     captured = capsys.readouterr()
 
