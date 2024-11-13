@@ -10,6 +10,9 @@ from dagster import (
     AssetCheckSpec,
     AssetCheckResult,
 )
+
+import re
+
 from dagster_pipes import PipesAssetCheckSeverity
 from typing import Dict, Any, Optional, List, cast
 from pathlib import Path
@@ -331,6 +334,15 @@ def test_java_pipes_logging(
     assert result.success
 
     captured = capsys.readouterr()
+
+    err = captured.err
+
+    for level in ["DEBUG", "INFO", "WARNING", "EXCEPTION", "ERROR", "CRITICAL"]:
+        # check with a smart regex
+        assert re.search(
+            r"\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2} \+\d{4} - dagster - " + level + " -",
+            err,
+        )
 
     assert (
         "[pipes] did not receive any messages from external process" not in captured.err
