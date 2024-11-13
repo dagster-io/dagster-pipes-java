@@ -34,10 +34,6 @@ public class PipesLogger {
         log(new PipesLogLevel(PipesLog.WARNING.toValue(), 900), message);
     }
 
-    public void exception(String message) throws DagsterPipesException {
-        log(new PipesLogLevel(PipesLog.EXCEPTION.toValue(), 950), message);
-    }
-
     public void error(String message) throws DagsterPipesException {
         log(new PipesLogLevel(PipesLog.ERROR.toValue(), 1000), message);
     }
