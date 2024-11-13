@@ -7,7 +7,7 @@ import java.util.Map;
  * The serializable data passed from the orchestration process to the external process. This
  * gets wrapped in a PipesContext.
  */
-public class Context {
+public class PipesContext {
     private String[] assetKeys;
     private Map<String, String> codeVersionByAssetKey;
     private Map<String, Object> extras;

@@ -19,7 +19,6 @@ public class PipesTests {
     private Map<String, Object> extras;
     private String jobName;
     private Object payload;
-    private boolean throwException = false;
 
     private Map<String, PipesMetadata> metadata = null;
 
@@ -67,10 +66,6 @@ public class PipesTests {
         this.checkAssetKey = assetKey;
     }
 
-    void throwException() {
-        this.throwException = true;
-    }
-
     @Test
     public void testExtras() {
         Assertions.assertTrue(
@@ -92,44 +87,44 @@ public class PipesTests {
 
     @Test
     public void fullTest() throws DagsterPipesException {
-        PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
-        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
-        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
-
-        PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
-        session.runPipesSession(this::fullTest);
+        getTestSession().runDagsterPipes(this::fullTest);
     }
 
-    private void fullTest(PipesSession session) throws DagsterPipesException {
+    private void fullTest(PipesContext context) throws DagsterPipesException {
         if (this.payload != null) {
-            session.getContext().reportCustomMessage(this.payload);
+            context.reportCustomMessage(this.payload);
             System.out.println("Payload reported with custom message.");
         }
 
         if (this.materialization) {
             buildTestMetadata();
-            session.getContext().reportAssetMaterialization(
+            context.reportAssetMaterialization(
                 this.metadata, this.dataVersion, this.materializationAssetKey
             );
         }
         if (this.check) {
             buildTestMetadata();
-            session.getContext().reportAssetCheck(
+            context.reportAssetCheck(
                 this.checkName, this.passed, this.metadata, this.checkAssetKey
             );
         }
-        System.out.println("Finished try session");
     }
 
     @Test
     void testRunPipesSessionWithException() throws DagsterPipesException {
-        PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
-        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
-        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
-
-        PipesSession session = new PipesSession(paramsLoader, contextLoader, messageWriter);
-        session.runPipesSession((session1) -> {
+        getTestSession().runDagsterPipes((context) -> {
             throw new Exception("Very bad Java exception happened!");
+        });
+    }
+
+    @Test
+    void testLogging() throws DagsterPipesException {
+        getTestSession().runDagsterPipes((context) -> {
+            context.getLogger().debug("Debug message");
+            context.getLogger().info("Info message");
+            context.getLogger().warning("Warning message");
+            context.getLogger().error("Error message");
+            context.getLogger().critical("Critical message");
         });
     }
 
@@ -163,5 +158,12 @@ public class PipesTests {
             this.metadata.put("json", new PipesMetadata(jsonMap, Type.JSON));
         }
         return this.metadata;
+    }
+
+    private PipesSession getTestSession() throws DagsterPipesException {
+        PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
+        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
+        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
+        return new PipesSession(paramsLoader, contextLoader, messageWriter);
     }
 }

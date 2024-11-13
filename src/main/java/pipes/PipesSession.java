@@ -10,7 +10,6 @@ import pipes.writers.PipesMessageWriterChannel;
 
 import java.util.logging.Logger;
 
-import static org.mockito.Mockito.doCallRealMethod;
 import static org.mockito.Mockito.mock;
 
 public class PipesSession {
@@ -26,9 +25,9 @@ public class PipesSession {
         this.context = buildContext(paramsLoader, contextLoader, messageWriter);
     }
 
-    public void runPipesSession(ThrowingConsumer runnable) throws DagsterPipesException {
+    public void runDagsterPipes(ThrowingConsumer runnable) throws DagsterPipesException {
         try {
-            runnable.run(this);
+            runnable.run(this.context);
         } catch (Exception exception) {
             this.context.reportException(exception);
         } finally {
@@ -66,7 +65,6 @@ public class PipesSession {
             );
         } else {
             emitOrchestrationInactiveWarning();
-            // TODO:: figure out how to remove Mockito
             pipesContext = mock(PipesContext.class);
         }
         PipesContext.set(pipesContext);

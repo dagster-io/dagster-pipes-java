@@ -78,6 +78,12 @@ public class MainTest implements Runnable {
     )
     private boolean throwException = false;
 
+    @CommandLine.Option(
+        names = {"--logging"},
+        description = "Flag to test logging"
+    )
+    private boolean logging = false;
+
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
@@ -91,6 +97,7 @@ public class MainTest implements Runnable {
             }
             pipesTests.setInput(input);
 
+            // Setup payload if required
             if (this.customPayloadPath != null && !this.customPayloadPath.isEmpty()) {
                 cacheJson(this.customPayloadPath);
                 Object payload = loadParamByWrapperKey("payload", Object.class);
@@ -98,10 +105,16 @@ public class MainTest implements Runnable {
             }
 
             if (this.throwException) {
-                pipesTests.throwException();
                 pipesTests.testRunPipesSessionWithException();
+                return;
             }
 
+            if (this.logging) {
+                pipesTests.testLogging();
+                return;
+            }
+
+            // Setup materialization data if required
             if (this.reportAssetMaterializationJson != null && !this.reportAssetMaterializationJson.isEmpty()) {
                 cacheJson(this.reportAssetMaterializationJson);
                 String dataVersion = loadParamByWrapperKey("dataVersion", String.class);
@@ -109,15 +122,12 @@ public class MainTest implements Runnable {
                 pipesTests.setMaterialization(dataVersion, assetKey);
             }
 
+            // Setup check data if required
             if (this.reportAssetCheckJson != null && !this.reportAssetCheckJson.isEmpty()) {
                 cacheJson(this.reportAssetCheckJson);
                 String checkName = loadParamByWrapperKey("checkName", String.class);
                 boolean passed = loadParamByWrapperKey("passed", Boolean.class);
                 String assetKey = loadParamByWrapperKey("assetKey", String.class);
-                System.out.printf(
-                    "checkName: %s \npassed: %s \nassetKey: %s%n",
-                    checkName, passed, assetKey
-                );
                 pipesTests.setCheck(checkName, passed, assetKey);
             }
 

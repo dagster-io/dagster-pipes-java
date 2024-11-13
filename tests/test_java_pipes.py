@@ -10,6 +10,9 @@ from dagster import (
     AssetCheckSpec,
     AssetCheckResult,
 )
+
+import re
+
 from dagster_pipes import PipesAssetCheckSeverity
 from typing import Dict, Any, Optional, List, cast
 from pathlib import Path
@@ -231,7 +234,7 @@ def test_java_pipes_extras(
     )
 
 
-def test_java_pipes_error_logging(
+def test_java_pipes_exception_logging(
     tmpdir_factory,
     capsys,
 ):
@@ -285,6 +288,62 @@ def test_java_pipes_error_logging(
     assert not result.success
 
     captured = capsys.readouterr()
+
+    assert (
+        "[pipes] did not receive any messages from external process" not in captured.err
+    )
+
+
+def test_java_pipes_logging(
+    tmpdir_factory,
+    capsys,
+):
+    work_dir = tmpdir_factory.mktemp("work_dir")
+
+    messages_file = work_dir / "messages"
+
+    @asset
+    def java_asset(
+        context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
+    ):
+        args = [
+            "java",
+            "-jar",
+            str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            "--full",
+            "--logging",
+        ]
+
+        invocation_result = pipes_subprocess_client.run(
+            context=context,
+            command=args,
+        )
+
+        yield from invocation_result.get_results()
+
+    result = materialize(
+        [java_asset],
+        resources={
+            "pipes_subprocess_client": PipesSubprocessClient(
+                message_reader=PipesFileMessageReader(str(messages_file))
+            )
+        },
+        raise_on_error=False,
+    )
+
+    assert result.success
+
+    captured = capsys.readouterr()
+
+    err = captured.err
+
+    for level in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+        # example log line we are looking for:
+        # 2024-11-13 16:54:55 +0100 - dagster - WARNING - __ephemeral_asset_job__ - 2716d101-cf11-4baa-b22d-d2530cb8b121 - java_asset - Warning message
+
+        for line in err.split("\n"):
+            if f"{level.lower().capitalize()} message" in line:
+                assert level in line
 
     assert (
         "[pipes] did not receive any messages from external process" not in captured.err

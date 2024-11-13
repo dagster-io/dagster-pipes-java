@@ -6,16 +6,16 @@ public class PipesDataProvenance {
 
     private String codeVersion;
     private Map<String, String> inputDataVersions;
-    private boolean isUserProvided;
+    private boolean userProvided;
 
     public PipesDataProvenance(
         String codeVersion,
         Map<String, String> inputDataVersions,
-        boolean isUserProvided
+        boolean userProvided
     ) {
         this.codeVersion = codeVersion;
         this.inputDataVersions = inputDataVersions;
-        this.isUserProvided = isUserProvided;
+        this.userProvided = userProvided;
     }
 
     public String getCodeVersion() {
@@ -35,10 +35,10 @@ public class PipesDataProvenance {
     }
 
     public boolean isUserProvided() {
-        return isUserProvided;
+        return userProvided;
     }
 
     public void setUserProvided(boolean userProvided) {
-        isUserProvided = userProvided;
+        this.userProvided = userProvided;
     }
 }

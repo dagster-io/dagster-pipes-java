@@ -60,7 +60,7 @@ public class PipesMessage {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        System.out.println(result);
+        //System.out.println(result);
         return result;
     }
 }
