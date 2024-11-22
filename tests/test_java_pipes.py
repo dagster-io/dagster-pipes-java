@@ -121,8 +121,6 @@ def test_java_pipes_components(
     tmpdir_factory,
     capsys,
 ):
-    if isinstance(context_injector, PipesS3ContextInjector):
-        raise pytest.skip("S3 context not supported for this test")
 
     work_dir = tmpdir_factory.mktemp("work_dir")
 

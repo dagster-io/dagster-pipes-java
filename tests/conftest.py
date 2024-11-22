@@ -33,7 +33,10 @@ def aws_endpoint_url() -> Iterator[str]:
     server.start()
     host, port = server.get_host_and_port()
     os.environ["AWS_DEFAULT_REGION"] = moto.s3.responses.DEFAULT_REGION_NAME = (
-        "eu-east-1"
+        "us-east-1"
+    )
+    os.environ["AWS_REGION"] = moto.s3.responses.AWS_REGION = (
+       "us-east-1"
     )
     url = f"http://{host}:{port}"
     os.environ["AWS_ENDPOINT_URL"] = url

@@ -1,11 +1,11 @@
 package pipes;
 
-import com.amazonaws.services.s3.AmazonS3Client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import picocli.CommandLine;
 import pipes.data.PipesConstants;
 import pipes.loaders.PipesS3ContextLoader;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.File;
 import java.io.IOException;
@@ -98,7 +98,11 @@ public class MainTest implements Runnable {
         PipesTests pipesTests = new PipesTests();
         try {
             if (this.s3Context) {
-                AmazonS3Client amazonS3Client = new AmazonS3Client();
+                String endpointURL = System.getenv("AWS_ENDPOINT_URL");
+                String awsDefaultRegion = System.getenv("AWS_DEFAULT_REGION");
+                System.out.println(endpointURL);
+                System.out.println(awsDefaultRegion);
+                S3Client amazonS3Client = S3Client.builder().build();
                 PipesS3ContextLoader s3ContextLoader = new PipesS3ContextLoader(amazonS3Client);
                 pipesTests.setContextLoader(s3ContextLoader);
             } else if (this.context != null) {
