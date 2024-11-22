@@ -137,8 +137,6 @@ def test_java_pipes_components(
     ) -> MaterializeResult:
         job_name = context.dagster_run.job_name
 
-        breakpoint()
-
         args = [
             "java",
             "-jar",

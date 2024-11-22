@@ -37,10 +37,18 @@ def aws_endpoint_url() -> Iterator[str]:
     )
     url = f"http://{host}:{port}"
     os.environ["AWS_ENDPOINT_URL"] = url
+    os.environ["AWS_ACCESS_KEY_ID"] = "foo"
+    os.environ["AWS_SECRET_ACCESS_KEY"] = "bar"
     yield url
     server.stop()
-    del os.environ["AWS_DEFAULT_REGION"]
-    del os.environ["AWS_ENDPOINT_URL"]
+
+    for key in [
+        "AWS_ENDPOINT_URL",
+        "AWS_DEFAULT_REGION",
+        "AWS_ACCESS_KEY_ID",
+        "AWS_SECRET_ACCESS_KEY",
+    ]:
+        del os.environ[key]
 
 
 @pytest.fixture
