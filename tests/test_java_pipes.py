@@ -148,6 +148,7 @@ def test_java_pipes_components(
 
         if isinstance(context_injector, PipesS3ContextInjector):
             args.append("--s3-context")
+            args.append("--full")
 
         return pipes_subprocess_client.run(
             context=context,

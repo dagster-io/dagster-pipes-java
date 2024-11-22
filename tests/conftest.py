@@ -60,10 +60,9 @@ BUCKET_NAME = "pies-testing"
 
 
 @pytest.fixture
-def s3_bucket(s3_client: "S3Client"):
+def s3_bucket(s3_client: "S3Client") -> str:
     s3_client.create_bucket(Bucket=BUCKET_NAME)
-    yield BUCKET_NAME
-    s3_client.delete_bucket(Bucket=BUCKET_NAME)
+    return BUCKET_NAME
 
 
 @pytest_cases.fixture
