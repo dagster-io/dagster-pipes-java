@@ -11,12 +11,10 @@ from dagster import (
     AssetCheckResult,
 )
 
-import re
 
 from dagster_pipes import PipesAssetCheckSeverity
 from typing import Dict, Any, Optional, List, cast
 from pathlib import Path
-import subprocess
 import pytest
 from pytest_cases import parametrize
 from dagster._core.pipes.utils import (
@@ -35,10 +33,10 @@ from dagster_pipes import (
     PipesDefaultMessageWriter,
     PipesParams,
 )
-
 from dagster._core.pipes.context import (
     PipesMessageHandler,
 )
+from dagster_aws.pipes import PipesS3ContextInjector
 
 
 @contextmanager
@@ -75,11 +73,6 @@ extras_strategy = from_schema({"type": ["object"]})
 ROOT_DIR = Path(__file__).parent.parent
 
 CLASS_PATH = ROOT_DIR / "build/classes/java/main/pipes/PipesMappingParamsLoader.class"
-
-
-@pytest.fixture(scope="session", autouse=True)
-def built_jar():
-    subprocess.run(["./gradlew", "build"], check=True)
 
 
 # metadata must have string keys
@@ -122,15 +115,15 @@ CUSTOM_MESSAGE_PAYLOADS = METADATA_LIST.copy() + [
 
 
 @parametrize("metadata", METADATA_LIST)
-@parametrize(
-    "context_injector", [PipesEnvContextInjector(), PipesTempFileContextInjector()]
-)
 def test_java_pipes_components(
     context_injector: PipesContextInjector,
     metadata: Dict[str, Any],
     tmpdir_factory,
     capsys,
 ):
+    if isinstance(context_injector, PipesS3ContextInjector):
+        raise pytest.skip("S3 context not supported for this test")
+
     work_dir = tmpdir_factory.mktemp("work_dir")
 
     extras_path = work_dir / "extras.json"
@@ -144,6 +137,8 @@ def test_java_pipes_components(
     ) -> MaterializeResult:
         job_name = context.dagster_run.job_name
 
+        breakpoint()
+
         args = [
             "java",
             "-jar",
@@ -152,6 +147,9 @@ def test_java_pipes_components(
             f"--extras={str(extras_path)}",
             f"--jobName={job_name}",
         ]
+
+        if isinstance(context_injector, PipesS3ContextInjector):
+            args.append("--s3-context")
 
         return pipes_subprocess_client.run(
             context=context,
