@@ -5,6 +5,7 @@ description = "Add your description here"
 readme = "README.md"
 requires-python = ">=3.12"
 dependencies = [
+    "dagster-aws>=0.25.0",
     "dagster>=1.8.9",
 ]
 
@@ -21,6 +22,9 @@ dev-dependencies = [
     "pytest>=8.3.3",
     "ruff>=0.6.8",
     "pytest-cases>=3.8.6",
+    "moto[server,s3]>=5.0.21",
+    "boto3[s3]>=1.35.67",
+    "boto3-stubs[s3]>=1.35.67",
 ]
 
 [tool.dagster]
