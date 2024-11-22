@@ -1,9 +1,11 @@
 package pipes;
 
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import picocli.CommandLine;
 import pipes.data.PipesConstants;
+import pipes.loaders.PipesS3ContextLoader;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +24,12 @@ public class MainTest implements Runnable {
         description = "Provide DAGSTER_PIPES_CONTEXT value for testing"
     )
     private String context;
+
+    @CommandLine.Option(
+        names = {"--s3-context"},
+        description = "Load S3 context"
+    )
+    private boolean s3Context = false;
 
     @CommandLine.Option(
         names = {"--messages"},
@@ -89,8 +97,12 @@ public class MainTest implements Runnable {
         Map<String, String> input = new HashMap<>();
         PipesTests pipesTests = new PipesTests();
         try {
-            if (this.context != null) {
-                input.put(PipesConstants.CONTEXT_ENV_VAR.name, this.context);
+            if (this.s3Context) {
+                AmazonS3Client amazonS3Client = new AmazonS3Client();
+                PipesS3ContextLoader s3ContextLoader = new PipesS3ContextLoader(amazonS3Client);
+                pipesTests.setContextLoader(s3ContextLoader);
+            } else if (this.context != null) {
+                input.put(PipesConstants.CONTEXT_ENV_VAR.name, context);
             }
             if (this.messages != null) {
                 input.put(PipesConstants.MESSAGES_ENV_VAR.name, this.messages);
