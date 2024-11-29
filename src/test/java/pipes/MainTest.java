@@ -5,6 +5,10 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import picocli.CommandLine;
 import pipes.data.PipesConstants;
 import pipes.loaders.PipesS3ContextLoader;
+import pipes.writers.PipesDefaultMessageWriter;
+import pipes.writers.PipesMessageWriter;
+import pipes.writers.PipesMessageWriterChannel;
+import pipes.writers.PipesS3MessageWriter;
 import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.File;
@@ -92,17 +96,23 @@ public class MainTest implements Runnable {
     )
     private boolean logging = false;
 
+    @CommandLine.Option(
+        names = {"--message-writer"},
+        description = "Specify the type of message writer: s3/default"
+    )
+    private String messageWriter;
+
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
         PipesTests pipesTests = new PipesTests();
         try {
+            S3Client amazonS3Client = S3Client.builder().build();
             if (this.s3Context) {
                 String endpointURL = System.getenv("AWS_ENDPOINT_URL");
                 String awsDefaultRegion = System.getenv("AWS_DEFAULT_REGION");
                 System.out.println(endpointURL);
                 System.out.println(awsDefaultRegion);
-                S3Client amazonS3Client = S3Client.builder().build();
                 PipesS3ContextLoader s3ContextLoader = new PipesS3ContextLoader(amazonS3Client);
                 pipesTests.setContextLoader(s3ContextLoader);
             } else if (this.context != null) {
@@ -112,6 +122,21 @@ public class MainTest implements Runnable {
                 input.put(PipesConstants.MESSAGES_ENV_VAR.name, this.messages);
             }
             pipesTests.setInput(input);
+
+            final PipesMessageWriter<? extends PipesMessageWriterChannel> writer;
+            if (this.messageWriter != null && !this.messageWriter.isEmpty()) {
+                switch (this.messageWriter) {
+                    case "s3":
+                        writer = new PipesS3MessageWriter(amazonS3Client);
+                        break;
+                    case "default":
+                        writer = new PipesDefaultMessageWriter();
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Specified unknown message writer!");
+                }
+                pipesTests.setMessageWriter(writer);
+            }
 
             // Setup payload if required
             if (this.customPayloadPath != null && !this.customPayloadPath.isEmpty()) {
