@@ -163,9 +163,6 @@ def test_java_pipes_components(
     tmpdir_factory,
     capsys,
 ):
-    if isinstance(message_reader, PipesS3MessageReader):
-        pytest.skip("S3 message reader not supported")
-
     @asset
     def java_asset(
         context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
@@ -200,6 +197,10 @@ def test_java_pipes_components(
     )
 
     assert result.success
+
+    out, err = capsys.readouterr()
+
+    assert "Hello from Java!" in err
 
 
 @parametrize("metadata", METADATA_LIST)
