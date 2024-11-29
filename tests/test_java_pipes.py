@@ -181,10 +181,17 @@ def test_java_pipes_components(
         if isinstance(message_reader, PipesS3MessageReader):
             args.extend(["--message-writer", "s3"])
 
-        return pipes_subprocess_client.run(
+        invocation = pipes_subprocess_client.run(
             context=context,
             command=args,
-        ).get_materialize_result()
+        )
+
+        custom_messages = invocation.get_custom_messages()
+
+        assert len(custom_messages) == 1
+        assert custom_messages[0] == "Hello from Java!"
+
+        return invocation.get_materialize_result()
 
     result = materialize(
         [java_asset],
@@ -197,10 +204,6 @@ def test_java_pipes_components(
     )
 
     assert result.success
-
-    out, err = capsys.readouterr()
-
-    assert "Hello from Java!" in err
 
 
 @parametrize("metadata", METADATA_LIST)
