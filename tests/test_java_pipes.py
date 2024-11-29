@@ -11,11 +11,10 @@ from dagster import (
     AssetCheckResult,
 )
 
-
+import pytest
 from dagster_pipes import PipesAssetCheckSeverity
 from typing import Dict, Any, Optional, List, cast
 from pathlib import Path
-import pytest
 from pytest_cases import parametrize
 from dagster._core.pipes.utils import (
     PipesEnvContextInjector,
@@ -36,7 +35,8 @@ from dagster_pipes import (
 from dagster._core.pipes.context import (
     PipesMessageHandler,
 )
-from dagster_aws.pipes import PipesS3ContextInjector
+from dagster._core.pipes.client import PipesMessageReader
+from dagster_aws.pipes import PipesS3ContextInjector, PipesS3MessageReader
 
 
 @contextmanager
@@ -115,13 +115,11 @@ CUSTOM_MESSAGE_PAYLOADS = METADATA_LIST.copy() + [
 
 
 @parametrize("metadata", METADATA_LIST)
-def test_java_pipes_components(
-    context_injector: PipesContextInjector,
+def test_java_pipes_reconstruction(
     metadata: Dict[str, Any],
     tmpdir_factory,
     capsys,
 ):
-
     work_dir = tmpdir_factory.mktemp("work_dir")
 
     extras_path = work_dir / "extras.json"
@@ -144,10 +142,6 @@ def test_java_pipes_components(
             f"--jobName={job_name}",
         ]
 
-        if isinstance(context_injector, PipesS3ContextInjector):
-            args.append("--s3-context")
-            args.append("--full")
-
         return pipes_subprocess_client.run(
             context=context,
             command=args,
@@ -156,9 +150,50 @@ def test_java_pipes_components(
 
     result = materialize(
         [java_asset],
+        resources={"pipes_subprocess_client": PipesSubprocessClient()},
+        raise_on_error=False,
+    )
+
+    assert result.success
+
+
+def test_java_pipes_components(
+    context_injector: PipesContextInjector,
+    message_reader: PipesMessageReader,
+    tmpdir_factory,
+    capsys,
+):
+    if isinstance(message_reader, PipesS3MessageReader):
+        pytest.skip("S3 message reader not supported")
+
+    @asset
+    def java_asset(
+        context: AssetExecutionContext, pipes_subprocess_client: PipesSubprocessClient
+    ) -> MaterializeResult:
+        args = [
+            "java",
+            "-jar",
+            str(ROOT_DIR / "build/libs/dagster-pipes-java-1.0-SNAPSHOT.jar"),
+            "--env",
+            "--full",
+        ]
+
+        if isinstance(context_injector, PipesS3ContextInjector):
+            args.append("--s3-context")
+
+        if isinstance(message_reader, PipesS3MessageReader):
+            args.extend(["--message-writer", "s3"])
+
+        return pipes_subprocess_client.run(
+            context=context,
+            command=args,
+        ).get_materialize_result()
+
+    result = materialize(
+        [java_asset],
         resources={
             "pipes_subprocess_client": PipesSubprocessClient(
-                context_injector=context_injector
+                context_injector=context_injector, message_reader=message_reader
             )
         },
         raise_on_error=False,
