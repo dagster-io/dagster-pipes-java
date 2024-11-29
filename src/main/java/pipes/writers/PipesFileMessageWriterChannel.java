@@ -36,4 +36,7 @@ public class PipesFileMessageWriterChannel implements PipesMessageWriterChannel 
     public String getPath() {
         return path;
     }
+
+    @Override
+    public void close() {}
 }

@@ -6,4 +6,5 @@ public interface PipesMessageWriterChannel {
 
     void writeMessage(PipesMessage message) throws DagsterPipesException;
 
+    void close() throws DagsterPipesException;
 }

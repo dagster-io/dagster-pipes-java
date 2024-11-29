@@ -31,4 +31,7 @@ public class PipesBufferedStreamMessageWriterChannel implements PipesMessageWrit
             stream.flush();
         }
     }
+
+    @Override
+    public void close() {}
 }

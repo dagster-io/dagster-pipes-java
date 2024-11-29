@@ -1,5 +1,7 @@
 package pipes.writers;
 
+import pipes.DagsterPipesException;
+
 import java.io.StringWriter;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -15,6 +17,8 @@ public abstract class PipesBlobStoreMessageWriterChannel implements PipesMessage
     private final Queue<PipesMessage> buffer;
     private final AtomicInteger counter;
     private final Lock lock;
+    private Thread uploadThread;
+    private volatile boolean shouldClose = false;
 
     public PipesBlobStoreMessageWriterChannel(float interval) {
         this.interval = interval;
@@ -56,17 +60,19 @@ public abstract class PipesBlobStoreMessageWriterChannel implements PipesMessage
      * Starts a buffered upload loop in a separate thread.
      */
     public void startBufferedUploadLoop() {
-        Thread uploadThread = new Thread(this::uploadLoop);
-        uploadThread.setDaemon(true);
-        uploadThread.start();
+        this.uploadThread = new Thread(this::uploadLoop);
+        this.uploadThread.setDaemon(true);
+        this.uploadThread.start();
+    }
 
-        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
-            try {
-                uploadThread.interrupt();
-                uploadThread.join(60000);
-            } catch (InterruptedException ignored) {
-            }
-        }));
+    @Override
+    public void close() throws DagsterPipesException {
+        this.shouldClose = true;
+        try {
+            this.uploadThread.join();
+        } catch (InterruptedException interruptedException) {
+            throw new DagsterPipesException("Failed to join thread!", interruptedException);
+        }
     }
 
     /**
@@ -75,7 +81,7 @@ public abstract class PipesBlobStoreMessageWriterChannel implements PipesMessage
     private void uploadLoop() {
         LocalDateTime startOrLastUpload = LocalDateTime.now();
 
-        while (!Thread.currentThread().isInterrupted()) {
+        while (!shouldClose) {
             try {
                 LocalDateTime now = LocalDateTime.now();
                 boolean shouldUpload = Duration.between(startOrLastUpload, now).getSeconds() > interval;
@@ -97,6 +103,16 @@ public abstract class PipesBlobStoreMessageWriterChannel implements PipesMessage
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
+        }
+        Queue<PipesMessage> messagesToUpload = flushMessages();
+        StringWriter payload = new StringWriter();
+        for (PipesMessage message: messagesToUpload) {
+            payload.write(message.toString());
+            payload.write("\n");
+        }
+
+        if (payload.getBuffer().length() > 0) {
+            uploadMessagesChunk(payload, counter.getAndIncrement());
         }
     }
 }
