@@ -34,6 +34,9 @@ public class PipesTests {
     private boolean passed;
     private String checkAssetKey;
 
+    //Message writer
+    private PipesMessageWriter<? extends PipesMessageWriterChannel> pipesMessageWriter;
+
     void setInput(Map<String, String> input) {
         this.input = input;
     }
@@ -70,6 +73,10 @@ public class PipesTests {
         this.checkName = checkName;
         this.passed = passed;
         this.checkAssetKey = assetKey;
+    }
+
+    void setMessageWriter(PipesMessageWriter<? extends PipesMessageWriterChannel> writer) {
+        this.pipesMessageWriter = writer;
     }
 
     @Test
@@ -170,7 +177,7 @@ public class PipesTests {
         PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
         PipesContextLoader contextLoader = this.contextLoader == null
             ? new PipesDefaultContextLoader() : this.contextLoader;
-        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
+        PipesMessageWriter<? extends PipesMessageWriterChannel> messageWriter = this.pipesMessageWriter;
         return new PipesSession(paramsLoader, contextLoader, messageWriter);
     }
 }

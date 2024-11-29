@@ -5,9 +5,8 @@ import pipes.DagsterPipesException;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Map;
 
-public class PipesFileMessageWriterChannel extends PipesMessageWriter<PipesMessageWriterChannel> implements PipesMessageWriterChannel {
+public class PipesFileMessageWriterChannel implements PipesMessageWriterChannel {
 
     private final String path;
 
@@ -36,10 +35,5 @@ public class PipesFileMessageWriterChannel extends PipesMessageWriter<PipesMessa
 
     public String getPath() {
         return path;
-    }
-
-    @Override
-    public PipesMessageWriterChannel open(Map<String, Object> params) {
-        return this;
     }
 }
