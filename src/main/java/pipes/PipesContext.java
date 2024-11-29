@@ -19,7 +19,7 @@ public class PipesContext {
     private PipesMessageWriterChannel messageChannel = null;
     private final Set<String> materializedAssets;
     private boolean closed;
-    private final PipesLogger logger;
+    final PipesLogger logger;
     private Exception exception = null;
 
     public PipesContext(

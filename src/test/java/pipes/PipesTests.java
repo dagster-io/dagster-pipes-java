@@ -104,6 +104,8 @@ public class PipesTests {
     }
 
     private void fullTest(PipesContext context) throws DagsterPipesException {
+        context.logger.info("Hello from Java!");
+
         if (this.payload != null) {
             context.reportCustomMessage(this.payload);
             System.out.println("Payload reported with custom message.");
