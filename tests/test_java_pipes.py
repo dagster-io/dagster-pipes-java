@@ -419,7 +419,7 @@ def test_java_pipes_custom_message(
             command=args,
         )
 
-        assert invocation_result.get_custom_messages()[0] == custom_message_payload
+        assert invocation_result.get_custom_messages()[-1] == custom_message_payload
 
         materialization = invocation_result.get_materialize_result()
 
