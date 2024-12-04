@@ -21,7 +21,7 @@ public class PipesDefaultMessageWriter extends PipesMessageWriter<PipesMessageWr
                 params,
                 PipesConstants.PATH_KEY.name,
                 String.class,
-                this.getClass()
+                PipesDefaultMessageWriter.class
             );
             return new PipesFileMessageWriterChannel(path);
         } else if (params.containsKey(STDIO_KEY)) {
@@ -29,7 +29,7 @@ public class PipesDefaultMessageWriter extends PipesMessageWriter<PipesMessageWr
                 params,
                 STDIO_KEY,
                 String.class,
-                this.getClass()
+                PipesDefaultMessageWriter.class
             );
             OutputStream target = getTarget(stream, STDIO_KEY);
             return new PipesStreamMessageWriterChannel(target);
@@ -38,7 +38,7 @@ public class PipesDefaultMessageWriter extends PipesMessageWriter<PipesMessageWr
                 params,
                 BUFFERED_STDIO_KEY,
                 String.class,
-                this.getClass()
+                PipesDefaultMessageWriter.class
             );
             OutputStream target = getTarget(BUFFERED_STDIO_KEY, stream);
             PipesBufferedStreamMessageWriterChannel channel =

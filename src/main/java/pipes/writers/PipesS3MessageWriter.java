@@ -35,8 +35,8 @@ public class PipesS3MessageWriter extends PipesBlobStoreMessageWriter {
      */
     @Override
     public PipesS3MessageWriterChannel makeChannel(Map<String, Object> params, float interval) throws DagsterPipesException {
-        String bucket = assertParamType(params, "bucket", String.class, this.getClass());
-        String keyPrefix = assertParamType(params, "key_prefix", String.class, this.getClass());
+        String bucket = assertParamType(params, "bucket", String.class, PipesS3MessageWriter.class);
+        String keyPrefix = assertParamType(params, "key_prefix", String.class, PipesS3MessageWriter.class);
         return new PipesS3MessageWriterChannel(client, bucket, keyPrefix, super.interval);
     }
 }

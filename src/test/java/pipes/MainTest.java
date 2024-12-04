@@ -107,12 +107,15 @@ public class MainTest implements Runnable {
         Map<String, String> input = new HashMap<>();
         PipesTests pipesTests = new PipesTests();
         try {
-            S3Client amazonS3Client = S3Client.builder().build();
-            if (this.s3Context) {
+            S3Client amazonS3Client = null;
+            if (this.s3Context || (this.messageWriter != null && this.messageWriter.equals("s3"))) {
+                amazonS3Client = S3Client.builder().build();
                 String endpointURL = System.getenv("AWS_ENDPOINT_URL");
                 String awsDefaultRegion = System.getenv("AWS_DEFAULT_REGION");
                 System.out.println(endpointURL);
                 System.out.println(awsDefaultRegion);
+            }
+            if (this.s3Context) {
                 PipesS3ContextLoader s3ContextLoader = new PipesS3ContextLoader(amazonS3Client);
                 pipesTests.setContextLoader(s3ContextLoader);
             } else if (this.context != null) {

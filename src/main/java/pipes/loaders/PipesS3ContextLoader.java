@@ -22,8 +22,8 @@ public class PipesS3ContextLoader extends PipesContextLoader {
 
     @Override
     public PipesContextData loadContext(Map<String, Object> params) throws DagsterPipesException {
-        String bucket = PipesUtils.assertParamType(params, "bucket", String.class, this.getClass());
-        String key = PipesUtils.assertParamType(params, "key", String.class, this.getClass());
+        String bucket = PipesUtils.assertParamType(params, "bucket", String.class, PipesS3ContextLoader.class);
+        String key = PipesUtils.assertParamType(params, "key", String.class, PipesS3ContextLoader.class);
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
             .bucket(bucket)
             .key(key)
