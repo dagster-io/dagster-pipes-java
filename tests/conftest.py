@@ -1,7 +1,7 @@
 from typing_extensions import TYPE_CHECKING
 import pytest
 from moto.server import ThreadedMotoServer
-from typing import Iterator
+from typing import Iterator, Optional
 import boto3
 import subprocess
 import pytest_cases
@@ -10,8 +10,11 @@ from dagster._core.pipes.utils import (
     PipesEnvContextInjector,
     PipesTempFileContextInjector,
 )
-from dagster._core.pipes.client import PipesContextInjector
+from dagster_aws.pipes import PipesS3MessageReader
+from dagster._core.pipes.client import PipesContextInjector, PipesMessageReader
 import tests.cases.context_injector as context_injector_cases
+import tests.cases.message_reader as message_reader_cases
+
 import os
 import moto
 import moto.s3.responses
@@ -33,8 +36,9 @@ def aws_endpoint_url() -> Iterator[str]:
     server.start()
     host, port = server.get_host_and_port()
     os.environ["AWS_DEFAULT_REGION"] = moto.s3.responses.DEFAULT_REGION_NAME = (
-        "eu-east-1"
+        "us-east-1"
     )
+    os.environ["AWS_REGION"] = moto.s3.responses.AWS_REGION = "us-east-1"
     url = f"http://{host}:{port}"
     os.environ["AWS_ENDPOINT_URL"] = url
     os.environ["AWS_ACCESS_KEY_ID"] = "foo"
@@ -74,5 +78,16 @@ def context_injector(params) -> PipesContextInjector:
         return PipesTempFileContextInjector()
     elif params["type"] == "s3":
         return PipesS3ContextInjector(client=params["client"], bucket=params["bucket"])
+    else:
+        raise ValueError(f"Unknown type: {params['type']}")
+
+
+@pytest_cases.fixture
+@pytest_cases.parametrize_with_cases("params", cases=message_reader_cases)
+def message_reader(params) -> Optional[PipesMessageReader]:
+    if params["type"] == "default":
+        return None
+    elif params["type"] == "s3":
+        return PipesS3MessageReader(client=params["client"], bucket=params["bucket"])
     else:
         raise ValueError(f"Unknown type: {params['type']}")

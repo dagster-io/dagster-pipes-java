@@ -17,28 +17,28 @@ public class PipesDefaultMessageWriter extends PipesMessageWriter<PipesMessageWr
     @Override
     public PipesMessageWriterChannel open(Map<String, Object> params) throws DagsterPipesException {
         if (params.containsKey(PipesConstants.PATH_KEY.name)) {
-            String path = PipesUtils.assertEnvParamType(
+            String path = PipesUtils.assertParamType(
                 params,
                 PipesConstants.PATH_KEY.name,
                 String.class,
-                this.getClass()
+                PipesDefaultMessageWriter.class
             );
             return new PipesFileMessageWriterChannel(path);
         } else if (params.containsKey(STDIO_KEY)) {
-            String stream = PipesUtils.assertEnvParamType(
+            String stream = PipesUtils.assertParamType(
                 params,
                 STDIO_KEY,
                 String.class,
-                this.getClass()
+                PipesDefaultMessageWriter.class
             );
             OutputStream target = getTarget(stream, STDIO_KEY);
             return new PipesStreamMessageWriterChannel(target);
         } else if (params.containsKey(BUFFERED_STDIO_KEY)) {
-            String stream = PipesUtils.assertEnvParamType(
+            String stream = PipesUtils.assertParamType(
                 params,
                 BUFFERED_STDIO_KEY,
                 String.class,
-                this.getClass()
+                PipesDefaultMessageWriter.class
             );
             OutputStream target = getTarget(BUFFERED_STDIO_KEY, stream);
             PipesBufferedStreamMessageWriterChannel channel =

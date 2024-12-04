@@ -4,6 +4,12 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import picocli.CommandLine;
 import pipes.data.PipesConstants;
+import pipes.loaders.PipesS3ContextLoader;
+import pipes.writers.PipesDefaultMessageWriter;
+import pipes.writers.PipesMessageWriter;
+import pipes.writers.PipesMessageWriterChannel;
+import pipes.writers.PipesS3MessageWriter;
+import software.amazon.awssdk.services.s3.S3Client;
 
 import java.io.File;
 import java.io.IOException;
@@ -22,6 +28,12 @@ public class MainTest implements Runnable {
         description = "Provide DAGSTER_PIPES_CONTEXT value for testing"
     )
     private String context;
+
+    @CommandLine.Option(
+        names = {"--s3-context"},
+        description = "Load S3 context"
+    )
+    private boolean s3Context = false;
 
     @CommandLine.Option(
         names = {"--messages"},
@@ -84,18 +96,50 @@ public class MainTest implements Runnable {
     )
     private boolean logging = false;
 
+    @CommandLine.Option(
+        names = {"--message-writer"},
+        description = "Specify the type of message writer: s3/default"
+    )
+    private String messageWriter;
+
     @Override
     public void run() {
         Map<String, String> input = new HashMap<>();
         PipesTests pipesTests = new PipesTests();
         try {
-            if (this.context != null) {
-                input.put(PipesConstants.CONTEXT_ENV_VAR.name, this.context);
+            S3Client amazonS3Client = null;
+            if (this.s3Context || (this.messageWriter != null && this.messageWriter.equals("s3"))) {
+                amazonS3Client = S3Client.builder().build();
+                String endpointURL = System.getenv("AWS_ENDPOINT_URL");
+                String awsDefaultRegion = System.getenv("AWS_DEFAULT_REGION");
+                System.out.println(endpointURL);
+                System.out.println(awsDefaultRegion);
+            }
+            if (this.s3Context) {
+                PipesS3ContextLoader s3ContextLoader = new PipesS3ContextLoader(amazonS3Client);
+                pipesTests.setContextLoader(s3ContextLoader);
+            } else if (this.context != null) {
+                input.put(PipesConstants.CONTEXT_ENV_VAR.name, context);
             }
             if (this.messages != null) {
                 input.put(PipesConstants.MESSAGES_ENV_VAR.name, this.messages);
             }
             pipesTests.setInput(input);
+
+            final PipesMessageWriter<? extends PipesMessageWriterChannel> writer;
+            if (this.messageWriter != null && !this.messageWriter.isEmpty()) {
+                switch (this.messageWriter) {
+                    case "s3":
+                        writer = new PipesS3MessageWriter(amazonS3Client);
+                        break;
+                    case "default":
+                        writer = new PipesDefaultMessageWriter();
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Specified unknown message writer!");
+                }
+                pipesTests.setMessageWriter(writer);
+            }
 
             // Setup payload if required
             if (this.customPayloadPath != null && !this.customPayloadPath.isEmpty()) {

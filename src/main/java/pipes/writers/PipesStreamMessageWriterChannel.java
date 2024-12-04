@@ -15,4 +15,9 @@ public class PipesStreamMessageWriterChannel implements PipesMessageWriterChanne
     public void writeMessage(PipesMessage message) {
         writer.println(message.toString());
     }
+
+    @Override
+    public void close() {
+
+    }
 }

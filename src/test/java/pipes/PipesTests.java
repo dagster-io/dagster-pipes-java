@@ -15,6 +15,7 @@ import java.util.Map;
 public class PipesTests {
 
     private Map<String, String> input;
+    private PipesContextLoader contextLoader;
     private PipesContextData contextData;
     private Map<String, Object> extras;
     private String jobName;
@@ -33,6 +34,9 @@ public class PipesTests {
     private boolean passed;
     private String checkAssetKey;
 
+    //Message writer
+    private PipesMessageWriter<? extends PipesMessageWriterChannel> pipesMessageWriter;
+
     void setInput(Map<String, String> input) {
         this.input = input;
     }
@@ -49,6 +53,11 @@ public class PipesTests {
         this.contextData = DataLoader.getData(input);
     }
 
+    void setContextLoader(PipesContextLoader contextLoader) throws DagsterPipesException {
+        this.contextLoader = contextLoader;
+    }
+
+
     void setPayload(Object payload) {
         this.payload = payload;
     }
@@ -64,6 +73,10 @@ public class PipesTests {
         this.checkName = checkName;
         this.passed = passed;
         this.checkAssetKey = assetKey;
+    }
+
+    void setMessageWriter(PipesMessageWriter<? extends PipesMessageWriterChannel> writer) {
+        this.pipesMessageWriter = writer;
     }
 
     @Test
@@ -91,6 +104,8 @@ public class PipesTests {
     }
 
     private void fullTest(PipesContext context) throws DagsterPipesException {
+        context.reportCustomMessage("Hello from Java!");
+
         if (this.payload != null) {
             context.reportCustomMessage(this.payload);
             System.out.println("Payload reported with custom message.");
@@ -162,8 +177,9 @@ public class PipesTests {
 
     private PipesSession getTestSession() throws DagsterPipesException {
         PipesParamsLoader paramsLoader = new PipesEnvVarParamsLoader();
-        PipesContextLoader contextLoader = new PipesDefaultContextLoader();
-        PipesMessageWriter<PipesMessageWriterChannel> messageWriter = new PipesDefaultMessageWriter();
+        PipesContextLoader contextLoader = this.contextLoader == null
+            ? new PipesDefaultContextLoader() : this.contextLoader;
+        PipesMessageWriter<? extends PipesMessageWriterChannel> messageWriter = this.pipesMessageWriter;
         return new PipesSession(paramsLoader, contextLoader, messageWriter);
     }
 }

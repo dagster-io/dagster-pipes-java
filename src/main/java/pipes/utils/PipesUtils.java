@@ -12,7 +12,7 @@ public final class PipesUtils {
     private PipesUtils() {
     }
 
-    public static <T> T assertEnvParamType (
+    public static <T> T assertParamType(
         Map<String, ?> envParams,
         String key,
         Class<T> expectedType,

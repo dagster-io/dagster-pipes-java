@@ -15,12 +15,12 @@ public class PipesDefaultContextLoader extends PipesContextLoader {
 
     public PipesContextData loadContext(Map<String, Object> params) throws DagsterPipesException {
         if (params.containsKey(FILE_PATH_KEY)) {
-            String path = PipesUtils.assertEnvParamType(
+            String path = PipesUtils.assertParamType(
                 params, FILE_PATH_KEY, String.class, PipesDefaultContextLoader.class
             );
             return loadFromFile(path);
         } else if (params.containsKey(DIRECT_KEY)) {
-            Map<String, Object> data = PipesUtils.assertEnvParamType(
+            Map<String, Object> data = PipesUtils.assertParamType(
                 params, DIRECT_KEY, Map.class, PipesDefaultContextLoader.class
             );
             ObjectMapper mapper = new ObjectMapper();
