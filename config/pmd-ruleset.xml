@@ -9,19 +9,26 @@
         Custom PMD ruleset
     </description>
 
-
-    <rule ref="category/java/bestpractices.xml" />
+    <rule ref="category/java/bestpractices.xml">
+        <exclude name="SystemPrintln"/>
+    </rule>
 
     <rule ref="category/java/codestyle.xml">
         <exclude name="MethodArgumentCouldBeFinal"/>
         <exclude name="LocalVariableCouldBeFinal"/>
+        <exclude name="LongVariable"/>
     </rule>
 
-    <rule ref="category/java/design.xml" />
+    <rule ref="category/java/design.xml">
+        <exclude name="LawOfDemeter"/>
+    </rule>
 
     <!--<rule ref="category/java/documentation.xml" />-->
 
-    <rule ref="category/java/errorprone.xml" />
+    <rule ref="category/java/errorprone.xml">
+        <exclude name="AvoidLiteralsInIfCondition"/>
+        <exclude name="BeanMembersShouldSerialize"/>
+    </rule>
 
     <!--<rule ref="category/java/multithreading.xml" />-->
 

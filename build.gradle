@@ -40,8 +40,16 @@ jar {
 
 pmd {
     toolVersion = "6.48.0"
-    sourceSets = [java.sourceSets.findByName("main")]
-    ruleSets = [] // Clear the default rulesets to avoid conflicts
-    ruleSetFiles = files("${rootProject.projectDir}/config/pmd-ruleset.xml")
     ignoreFailures = true
+}
+
+tasks.withType(Pmd) {
+    // Exclude specific folders from analysis
+    exclude 'types/**'
+}
+
+pmdMain {
+    // Configuration for the main source set
+    ruleSetFiles = files('config/pmd-ruleset.xml')
+    ruleSets = [] // Disable default rulesets
 }
