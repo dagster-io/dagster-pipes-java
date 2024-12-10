@@ -46,10 +46,6 @@ pmd {
 tasks.withType(Pmd) {
     // Exclude specific folders from analysis
     exclude 'types/**'
-}
-
-pmdMain {
-    // Configuration for the main source set
     ruleSetFiles = files('config/pmd-ruleset.xml')
     ruleSets = [] // Disable default rulesets
 }

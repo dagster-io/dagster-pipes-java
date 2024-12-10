@@ -11,16 +11,21 @@
 
     <rule ref="category/java/bestpractices.xml">
         <exclude name="SystemPrintln"/>
+        <exclude name="JUnitTestsShouldIncludeAssert"/>
     </rule>
 
     <rule ref="category/java/codestyle.xml">
         <exclude name="MethodArgumentCouldBeFinal"/>
         <exclude name="LocalVariableCouldBeFinal"/>
         <exclude name="LongVariable"/>
+        <exclude name="CommentDefaultAccessModifier"/>
+        <exclude name="OnlyOneReturn"/>
+        <exclude name="AtLeastOneConstructor"/>
     </rule>
 
     <rule ref="category/java/design.xml">
         <exclude name="LawOfDemeter"/>
+        <exclude name="UseUtilityClass"/>
     </rule>
 
     <!--<rule ref="category/java/documentation.xml" />-->
@@ -28,6 +33,8 @@
     <rule ref="category/java/errorprone.xml">
         <exclude name="AvoidLiteralsInIfCondition"/>
         <exclude name="BeanMembersShouldSerialize"/>
+        <exclude name="AssignmentInOperand"/>
+        <exclude name="DetachedTestCase"/>
     </rule>
 
     <!--<rule ref="category/java/multithreading.xml" />-->
