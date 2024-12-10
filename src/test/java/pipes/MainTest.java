@@ -17,6 +17,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+@SuppressWarnings({
+    "PMD.AvoidThrowingRawExceptionTypes", "PMD.UnusedPrivateField",
+    "PMD.RedundantFieldInitializer", "PMD.ImmutableField"})
 @CommandLine.Command(name = "main-test", mixinStandardHelpOptions = true)
 public class MainTest implements Runnable {
 

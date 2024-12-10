@@ -2,6 +2,7 @@ package pipes.data;
 
 import java.util.Map;
 
+@SuppressWarnings("PMD")
 public class PipesDataProvenance {
 
     private String codeVersion;

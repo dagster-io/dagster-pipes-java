@@ -1,5 +1,5 @@
 package pipes;
 
 public interface ThrowingConsumer {
-    void run(PipesContext context) throws Exception;
+    void run(PipesContext context) throws DagsterPipesException;
 }

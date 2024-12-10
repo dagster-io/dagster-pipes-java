@@ -12,6 +12,7 @@ import pipes.writers.PipesMessageWriterChannel;
 import java.util.*;
 import java.util.logging.Logger;
 
+@SuppressWarnings({"PMD.GodClass", "PMD.TooManyMethods", "PMD.ImmutableField"})
 public class PipesContext {
 
     private static PipesContext instance;
@@ -221,22 +222,22 @@ public class PipesContext {
     }
 
     public void reportAssetMaterialization(
-        Map<String, PipesMetadata> pipesMetadata,
-        String dataVersion,
-        String assetKey
+        final Map<String, PipesMetadata> pipesMetadata,
+        final String dataVersion,
+        final String assetKey
     ) throws DagsterPipesException {
-        assetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_MATERIALIZATION);
-        if (this.materializedAssets.contains(assetKey)) {
+        final String actualAssetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_MATERIALIZATION);
+        if (this.materializedAssets.contains(actualAssetKey)) {
             throw new IllegalStateException(
-                "Asset keys: " + assetKey + " has already been materialized, cannot report additional data."
+                "Asset keys: " + actualAssetKey + " has already been materialized, cannot report additional data."
             );
         }
         System.out.println("writing message...");
         this.writeMessage(
             Method.REPORT_ASSET_MATERIALIZATION,
-            this.createMap(assetKey, dataVersion, pipesMetadata)
+            this.createMap(actualAssetKey, dataVersion, pipesMetadata)
         );
-        materializedAssets.add(assetKey);
+        materializedAssets.add(actualAssetKey);
     }
 
     public void reportAssetCheck(
@@ -251,19 +252,19 @@ public class PipesContext {
     }
 
     public void reportAssetCheck(
-        String checkName,
-        boolean passed,
-        PipesAssetCheckSeverity severity,
-        Map<String, PipesMetadata> pipesMetadata,
-        String assetKey
+        final String checkName,
+        final boolean passed,
+        final PipesAssetCheckSeverity severity,
+        final Map<String, PipesMetadata> pipesMetadata,
+        final String assetKey
     ) throws DagsterPipesException {
         System.out.println("was: " + checkName + " " + passed + " " + assetKey);
         assertNotNull(checkName, Method.REPORT_ASSET_CHECK, "checkName");
-        assetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
-        System.out.println("resolved:" + assetKey);
+        final String actualAssetKey = resolveOptionallyPassedAssetKey(assetKey, Method.REPORT_ASSET_CHECK);
+        System.out.println("resolved:" + actualAssetKey);
         this.writeMessage(
             Method.REPORT_ASSET_CHECK,
-            this.createMap(assetKey, checkName, passed, severity, pipesMetadata)
+            this.createMap(actualAssetKey, checkName, passed, severity, pipesMetadata)
         );
     }
 

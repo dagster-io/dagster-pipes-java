@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.SerializationFeature;
 
 import java.util.Map;
 
+@SuppressWarnings({"PMD.DataClass", "PMD.AvoidThrowingRawExceptionTypes"})
 @JsonPropertyOrder({"__dagster_pipes_version", "method", "params"})
 public class PipesMessage {
 
@@ -60,7 +61,6 @@ public class PipesMessage {
         } catch (JsonProcessingException e) {
             throw new RuntimeException(e);
         }
-        //System.out.println(result);
         return result;
     }
 }

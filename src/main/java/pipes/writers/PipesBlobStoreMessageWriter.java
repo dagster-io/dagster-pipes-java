@@ -9,10 +9,12 @@ public abstract class PipesBlobStoreMessageWriter extends PipesMessageWriter<Pip
     protected final float interval;
 
     public PipesBlobStoreMessageWriter() {
+        super();
         this.interval = 1000;
     }
 
     public PipesBlobStoreMessageWriter(float interval) {
+        super();
         this.interval = interval;
     }
 

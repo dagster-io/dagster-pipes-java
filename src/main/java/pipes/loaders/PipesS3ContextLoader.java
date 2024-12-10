@@ -17,6 +17,7 @@ public class PipesS3ContextLoader extends PipesContextLoader {
     private final S3Client client;
 
     public PipesS3ContextLoader(S3Client client) {
+        super();
         this.client = client;
     }
 

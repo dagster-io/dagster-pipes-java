@@ -313,7 +313,7 @@ def test_java_pipes_exception_logging(
             if method == "closed":
                 exception = message["params"]["exception"]
 
-                assert exception["name"] == "java.lang.Exception"
+                assert exception["name"] == "pipes.DagsterPipesException"
                 assert exception["message"] == "Very bad Java exception happened!"
                 assert exception["stack"] is not None
 

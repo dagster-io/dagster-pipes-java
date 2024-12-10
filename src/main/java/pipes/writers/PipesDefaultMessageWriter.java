@@ -40,10 +40,9 @@ public class PipesDefaultMessageWriter extends PipesMessageWriter<PipesMessageWr
                 String.class,
                 PipesDefaultMessageWriter.class
             );
-            OutputStream target = getTarget(BUFFERED_STDIO_KEY, stream);
-            PipesBufferedStreamMessageWriterChannel channel =
-                new PipesBufferedStreamMessageWriterChannel(target);
-            try {
+            PipesBufferedStreamMessageWriterChannel channel;
+            try (OutputStream target = getTarget(BUFFERED_STDIO_KEY, stream)) {
+                channel = new PipesBufferedStreamMessageWriterChannel(target);
                 channel.flush();
             } catch (IOException ioe) {
                 throw new DagsterPipesException(
