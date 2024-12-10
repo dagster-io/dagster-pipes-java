@@ -2,6 +2,7 @@ package pipes.loaders;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import pipes.DagsterPipesException;
 import pipes.data.PipesConstants;
 
 import java.io.ByteArrayInputStream;
@@ -19,11 +20,13 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
         this.mapping = mapping;
     }
 
+    @Override
     public boolean isDagsterPipesProcess() {
         return this.mapping.containsKey(PipesConstants.CONTEXT_ENV_VAR.name);
     }
 
-    public Optional<Map<String, Object>> loadContextParams() {
+    @Override
+    public Optional<Map<String, Object>> loadContextParams() throws DagsterPipesException {
         String rawValue = this.mapping.get(PipesConstants.CONTEXT_ENV_VAR.name);
         if (rawValue == null) {
             System.out.printf(
@@ -35,7 +38,8 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
         return Optional.of(decodeParam(rawValue));
     }
 
-    public Optional<Map<String, Object>> loadMessagesParams() {
+    @Override
+    public Optional<Map<String, Object>> loadMessagesParams() throws DagsterPipesException {
         String rawValue = this.mapping.get(PipesConstants.MESSAGES_ENV_VAR.name);
         if (rawValue == null) {
             System.out.printf(
@@ -47,7 +51,7 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
         return Optional.of(decodeParam(rawValue));
     }
 
-    private Map<String, Object> decodeParam(String rawValue) {
+    private Map<String, Object> decodeParam(String rawValue) throws DagsterPipesException {
         try {
             byte[] base64Decoded = Base64.getDecoder().decode(rawValue);
             byte[] zlibDecompressed = zlibDecompress(base64Decoded);
@@ -57,8 +61,7 @@ public class PipesMappingParamsLoader implements PipesParamsLoader {
                     new TypeReference<Map<String, Object>>() {}
             );
         } catch (IOException ioe) {
-            // TODO: Add logging here, if needed
-            throw new RuntimeException("Failed to decompress parameters", ioe);
+            throw new DagsterPipesException("Failed to decompress parameters", ioe);
         }
     }
 

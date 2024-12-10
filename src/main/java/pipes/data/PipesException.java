@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 import java.util.Arrays;
 
+@SuppressWarnings("PMD")
 @JsonPropertyOrder({"name", "message", "cause", "stack", "context"})
 public class PipesException {
     private PipesException cause;

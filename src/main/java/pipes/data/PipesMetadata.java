@@ -1,4 +1,4 @@
-package pipes;
+package pipes.data;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("PMD")
 @JsonPropertyOrder({"raw_value", "type"})
 public class PipesMetadata {
 

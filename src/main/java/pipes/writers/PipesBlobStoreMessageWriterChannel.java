@@ -18,7 +18,7 @@ public abstract class PipesBlobStoreMessageWriterChannel implements PipesMessage
     private final AtomicInteger counter;
     private final Lock lock;
     private Thread uploadThread;
-    private volatile boolean shouldClose = false;
+    private volatile boolean shouldClose;
 
     public PipesBlobStoreMessageWriterChannel(float interval) {
         this.interval = interval;
@@ -80,6 +80,7 @@ public abstract class PipesBlobStoreMessageWriterChannel implements PipesMessage
      */
     private void uploadLoop() {
         LocalDateTime startOrLastUpload = LocalDateTime.now();
+        StringWriter payload;
 
         while (!shouldClose) {
             try {
@@ -88,7 +89,7 @@ public abstract class PipesBlobStoreMessageWriterChannel implements PipesMessage
 
                 if (!buffer.isEmpty() && shouldUpload) {
                     Queue<PipesMessage> messagesToUpload = flushMessages();
-                    StringWriter payload = new StringWriter();
+                    payload = new StringWriter();
                     for (PipesMessage message: messagesToUpload) {
                         payload.write(message.toString());
                         payload.write("\n");
@@ -105,7 +106,7 @@ public abstract class PipesBlobStoreMessageWriterChannel implements PipesMessage
             }
         }
         Queue<PipesMessage> messagesToUpload = flushMessages();
-        StringWriter payload = new StringWriter();
+        payload = new StringWriter();
         for (PipesMessage message: messagesToUpload) {
             payload.write(message.toString());
             payload.write("\n");

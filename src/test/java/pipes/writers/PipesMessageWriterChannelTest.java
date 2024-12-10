@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.*;
 class PipesMessageWriterChannelTest {
 
     @TempDir
-    static Path tempDir;
+    private static Path tempDir;
 
     private static PipesMessage message;
 

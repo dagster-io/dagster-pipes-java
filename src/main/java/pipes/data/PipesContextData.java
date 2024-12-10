@@ -7,6 +7,7 @@ import types.PartitionTimeWindow;
 import java.util.List;
 import java.util.Map;
 
+@SuppressWarnings("PMD")
 public class PipesContextData {
 
     @JsonProperty("asset_keys")

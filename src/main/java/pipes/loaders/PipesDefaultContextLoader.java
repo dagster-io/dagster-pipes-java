@@ -10,9 +10,10 @@ import java.io.IOException;
 import java.util.Map;
 
 public class PipesDefaultContextLoader extends PipesContextLoader {
-    private final String FILE_PATH_KEY = "path";
-    private final String DIRECT_KEY = "data";
+    private final static String FILE_PATH_KEY = "path";
+    private final static String DIRECT_KEY = "data";
 
+    @Override
     public PipesContextData loadContext(Map<String, Object> params) throws DagsterPipesException {
         if (params.containsKey(FILE_PATH_KEY)) {
             String path = PipesUtils.assertParamType(

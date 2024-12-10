@@ -1,6 +1,6 @@
 plugins {
     id 'java'
-    //id 'pmd'
+    id 'pmd'
 }
 
 group = 'org.example'
@@ -16,8 +16,6 @@ dependencies {
     implementation group: 'com.fasterxml.jackson.core', name: 'jackson-databind', version: '2.18.0'
     implementation 'info.picocli:picocli:4.7.6'
     annotationProcessor 'info.picocli:picocli-codegen:4.7.6'
-    //testImplementation platform('org.junit:junit-bom:5.10.0')
-    //testImplementation 'org.junit.jupiter:junit-jupiter'
     implementation 'org.junit.jupiter:junit-jupiter-api:5.10.0'
     implementation 'org.junit.jupiter:junit-jupiter-engine:5.10.0'
     implementation group: 'org.mockito', name: 'mockito-core', version: '2.7.5'
@@ -40,8 +38,14 @@ jar {
     dependsOn compileTestJava // Ensure test classes are compiled before creating the JAR
 }
 
+pmd {
+    toolVersion = "6.48.0"
+    ignoreFailures = true
+}
 
-//pmd {
-//    consoleOutput = true
-//    toolVersion = "7.6.0"
-//}
+tasks.withType(Pmd) {
+    // Exclude specific folders from analysis
+    exclude 'types/**'
+    ruleSetFiles = files('config/pmd-ruleset.xml')
+    ruleSets = [] // Disable default rulesets
+}

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import pipes.data.PipesContextData;
+import pipes.data.PipesMetadata;
 import pipes.loaders.*;
 import pipes.writers.*;
 import types.Type;
@@ -11,6 +12,7 @@ import types.Type;
 import java.util.HashMap;
 import java.util.Map;
 
+@SuppressWarnings("PMD.JUnit5TestShouldBePackagePrivate")
 @Disabled
 public class PipesTests {
 
@@ -21,15 +23,15 @@ public class PipesTests {
     private String jobName;
     private Object payload;
 
-    private Map<String, PipesMetadata> metadata = null;
+    private Map<String, PipesMetadata> metadata;
 
     //Related to reportAssetMaterialization
-    private boolean materialization = false;
+    private boolean materialization;
     private String dataVersion;
     private String materializationAssetKey;
 
     //Related to reportAssetCheck
-    private boolean check = false;
+    private boolean check;
     private String checkName;
     private boolean passed;
     private String checkAssetKey;
@@ -80,7 +82,7 @@ public class PipesTests {
     }
 
     @Test
-    public void testExtras() {
+    void testExtras() {
         Assertions.assertTrue(
             contextData.getExtras().entrySet().containsAll(this.extras.entrySet()),
             "Extras does not contain all provided entries."
@@ -89,7 +91,7 @@ public class PipesTests {
     }
 
     @Test
-    public void testJobName() {
+    void testJobName() {
         Assertions.assertEquals(
             this.jobName,
             contextData.getJobName(),
@@ -99,7 +101,7 @@ public class PipesTests {
     }
 
     @Test
-    public void fullTest() throws DagsterPipesException {
+    void fullTest() throws DagsterPipesException {
         getTestSession().runDagsterPipes(this::fullTest);
     }
 
@@ -128,7 +130,7 @@ public class PipesTests {
     @Test
     void testRunPipesSessionWithException() throws DagsterPipesException {
         getTestSession().runDagsterPipes((context) -> {
-            throw new Exception("Very bad Java exception happened!");
+            throw new DagsterPipesException("Very bad Java exception happened!");
         });
     }
 

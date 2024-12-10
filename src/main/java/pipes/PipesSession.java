@@ -12,10 +12,11 @@ import java.util.logging.Logger;
 
 import static org.mockito.Mockito.mock;
 
+@SuppressWarnings("PMD.AvoidCatchingGenericException")
 public class PipesSession {
 
     private final PipesContext context;
-    private static final Logger logger = Logger.getLogger(PipesSession.class.getName());
+    private static final Logger LOGGER = Logger.getLogger(PipesSession.class.getName());
 
     public PipesSession(
         PipesParamsLoader paramsLoader,
@@ -48,20 +49,19 @@ public class PipesSession {
             return PipesContext.get();
         }
 
-        if (paramsLoader == null) {
-            paramsLoader = new PipesEnvVarParamsLoader();
-        }
+        final PipesParamsLoader actualParamsLoader = paramsLoader == null
+            ? new PipesEnvVarParamsLoader() : paramsLoader;
 
         PipesContext pipesContext;
-        if (paramsLoader.isDagsterPipesProcess()) {
-            if (contextLoader == null) {
-                contextLoader = new PipesDefaultContextLoader();
-            }
-            if (messageWriter == null) {
-                messageWriter = new PipesDefaultMessageWriter();
-            }
+        if (actualParamsLoader.isDagsterPipesProcess()) {
+            final PipesContextLoader actualContextLoader = contextLoader == null
+                ? new PipesDefaultContextLoader() : contextLoader;
+            final PipesMessageWriter<? extends PipesMessageWriterChannel> actualMessageWriter
+                = messageWriter == null
+                ? new PipesDefaultMessageWriter() : messageWriter;
+
             pipesContext = new PipesContext(
-                paramsLoader, contextLoader, messageWriter
+                actualParamsLoader, actualContextLoader, actualMessageWriter
             );
         } else {
             emitOrchestrationInactiveWarning();
@@ -72,7 +72,7 @@ public class PipesSession {
     }
 
     private static void emitOrchestrationInactiveWarning() {
-        logger.warning(
+        LOGGER.warning(
             "This process was not launched by a Dagster orchestration process. All calls to the " +
             "`dagster-pipes` context or attempts to initialize " +
             "`dagster-pipes` abstractions are no-ops."

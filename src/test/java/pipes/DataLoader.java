@@ -16,7 +16,9 @@ public class DataLoader {
         Optional<Map<String, Object>> params = paramsLoader.loadContextParams();
         if (params.isPresent()) {
             return contextLoader.loadContext(params.get());
-        } else throw new DagsterPipesException("Can't load PipesContextData");
+        } else {
+            throw new DagsterPipesException("Can't load PipesContextData");
+        }
     }
 
     static PipesContextData getData(Map<String, String> input) throws DagsterPipesException {
@@ -28,6 +30,8 @@ public class DataLoader {
         Optional<Map<String, Object>> params = paramsLoader.loadContextParams();
         if (params.isPresent()) {
             return contextLoader.loadContext(params.get());
-        } else throw new DagsterPipesException("Can't load PipesContextData");
+        } else {
+            throw new DagsterPipesException("Can't load PipesContextData");
+        }
     }
 }
