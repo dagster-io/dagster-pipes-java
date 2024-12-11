@@ -1,3 +1,5 @@
+package pipes.utils;
+
 import pipes.DagsterPipesException;
 import pipes.PipesContext;
 import pipes.PipesSession;
@@ -38,16 +40,12 @@ public class Example {
         people.put("Diana", 30);
         people.put("Edward", 16);
 
-        long adults = people.values().stream()
+        int adults = (int) people.values().stream()
             .filter(age -> age >= 18)
             .count();
 
-        final Map<String, PipesMetadata> metadataMap = new HashMap<>();
-        final PipesMetadata metadata = new PipesMetadata(adults, Type.INT);
-        metadataMap.put("adults", metadata);
-
         context.reportAssetMaterialization(
-            metadataMap, null, null
+            adults, null, null
         );
     }
 }
